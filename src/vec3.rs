@@ -17,21 +17,18 @@ impl Vec3 {
     pub fn x(&self) -> f64 {
         self.x
     }
-
     pub fn y(&self) -> f64 {
         self.y
     }
-
     pub fn z(&self) -> f64 {
         self.z
     }
 
     pub fn get(&self, idx: usize) -> f64 {
-        assert!(idx <= 3);
         match idx {
-            1 => self.x,
-            2 => self.y,
-            3 => self.z,
+            0 => self.x,
+            1 => self.y,
+            2 => self.z,
             _ => panic!("invalid idx: {} for vec3", idx),
         }
     }
@@ -46,6 +43,23 @@ impl Vec3 {
         self.z = self.z * scale_factor;
     }
 
+    pub fn dot(&self, v: Vec3) -> f64 {
+        self.x * v.x + self.y * v.y + self.z * v.z
+    }
+    pub fn cross(&self, v: Vec3) -> Vec3 {
+        Vec3 {
+            x: self.y * v.z - self.z * v.y,
+            y: self.z * v.x - self.x * v.z,
+            z: self.x * v.y - self.y * v.x,
+        }
+    }
+    fn length_squared(&self) -> f64 {
+        self.x * self.x + self.y * self.y + self.z * self.z
+    }
+    pub fn length(&self) -> f64 {
+        self.length_squared().sqrt()
+    }
+
     pub fn to_string(&self) -> String {
         format!(
             "{} {} {}",
@@ -56,13 +70,48 @@ impl Vec3 {
     }
 }
 
-impl std::ops::Add<Vec3> for Vec3 {
+impl std::ops::Add for Vec3 {
     type Output = Vec3;
     fn add(self, rhs: Vec3) -> Vec3 {
         Vec3 {
             x: self.x + rhs.x,
             y: self.y + rhs.y,
             z: self.z + rhs.z,
+        }
+    }
+}
+
+impl std::ops::Sub for Vec3 {
+    type Output = Vec3;
+    fn sub(self, rhs: Vec3) -> Vec3 {
+        Vec3 {
+            x: self.x - rhs.x,
+            y: self.y - rhs.y,
+            z: self.z - rhs.z,
+        }
+    }
+}
+
+impl std::ops::Mul for Vec3 {
+    type Output = Vec3;
+
+    fn mul(self, rhs: Vec3) -> Vec3 {
+        Vec3 {
+            x: self.x * rhs.x,
+            y: self.y * rhs.y,
+            z: self.z * rhs.z,
+        }
+    }
+}
+
+impl std::ops::Div for Vec3 {
+    type Output = Vec3;
+
+    fn div(self, rhs: Vec3) -> Vec3 {
+        Vec3 {
+            x: self.x / rhs.x,
+            y: self.y / rhs.y,
+            z: self.z / rhs.z,
         }
     }
 }
