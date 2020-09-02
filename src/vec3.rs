@@ -49,9 +49,9 @@ impl Vec3 {
     pub fn to_string(&self) -> String {
         format!(
             "{} {} {}",
-            (self.x * 255.999) as u32,
-            (self.y * 255.999) as u32,
-            (self.z * 255.999) as u32
+            (self.x * 255.999) as u8,
+            (self.y * 255.999) as u8,
+            (self.z * 255.999) as u8
         )
     }
 }
