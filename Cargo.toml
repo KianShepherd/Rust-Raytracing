@@ -1,5 +1,10 @@
 [package]
 name = "raytracing"
+description = "Raytracing in one weekend in rust."
+readme = "README.md"
+repository = "https://github.com/KianShepherd/raytracing"
+license = "MIT OR Apache-2.0"
+publish = false
 version = "0.1.0"
 authors = ["Kian Shepherd <Kianshepherd73@gmail.com>"]
 edition = "2018"
