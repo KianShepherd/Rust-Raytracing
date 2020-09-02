@@ -4,6 +4,7 @@ pub struct Vec3 {
     z: f64,
 }
 
+#[allow(dead_code)]
 impl Vec3 {
     pub fn new(_x: f64, _y: f64, _z: f64) -> Vec3 {
         Vec3 {
