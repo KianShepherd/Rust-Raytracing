@@ -1,3 +1,4 @@
+mod ray;
 mod vec3;
 // run with
 // cargo make all

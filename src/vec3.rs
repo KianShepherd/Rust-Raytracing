@@ -1,3 +1,4 @@
+#[derive(Debug, Copy, Clone, PartialEq)]
 pub struct Vec3 {
     x: f64,
     y: f64,
@@ -37,10 +38,12 @@ impl Vec3 {
         self.y = -self.y;
         self.z = -self.z;
     }
-    pub fn scale(&mut self, scale_factor: f64) {
-        self.x = self.x * scale_factor;
-        self.y = self.y * scale_factor;
-        self.z = self.z * scale_factor;
+    pub fn scale(&mut self, scale_factor: f64) -> Vec3 {
+        Vec3 {
+            x: self.x * scale_factor,
+            y: self.y * scale_factor,
+            z: self.z * scale_factor,
+        }
     }
 
     pub fn dot(&self, v: Vec3) -> f64 {
