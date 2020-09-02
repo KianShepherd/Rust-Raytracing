@@ -33,12 +33,7 @@ impl Vec3 {
             _ => panic!("invalid idx: {} for vec3", idx),
         }
     }
-    pub fn negate(&mut self) {
-        self.x = -self.x;
-        self.y = -self.y;
-        self.z = -self.z;
-    }
-    pub fn scale(&mut self, scale_factor: f64) -> Vec3 {
+    pub fn scale(self, scale_factor: f64) -> Vec3 {
         Vec3 {
             x: self.x * scale_factor,
             y: self.y * scale_factor,
@@ -61,6 +56,9 @@ impl Vec3 {
     }
     pub fn length(&self) -> f64 {
         self.length_squared().sqrt()
+    }
+    pub fn unit_vector(&self) -> Vec3 {
+        self.scale(1.0 / self.length())
     }
 
     pub fn to_string(&self) -> String {
@@ -115,6 +113,17 @@ impl std::ops::Div for Vec3 {
             x: self.x / rhs.x,
             y: self.y / rhs.y,
             z: self.z / rhs.z,
+        }
+    }
+}
+
+impl std::ops::Neg for Vec3 {
+    type Output = Vec3;
+    fn neg(self) -> Vec3 {
+        Vec3 {
+            x: -self.x,
+            y: -self.y,
+            z: -self.z,
         }
     }
 }
