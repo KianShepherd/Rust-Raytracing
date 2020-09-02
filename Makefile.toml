@@ -1,0 +1,29 @@
+[tasks.clean]
+dependencies = ["clean1", "clean2"]
+
+[tasks.clean1]
+command = "cargo"
+args = ["clean"]
+
+[tasks.clean2]
+command = "rm"
+args = ["-f", "image.ppm"]
+
+[tasks.build]
+command = "cargo"
+args = ["build"]
+dependencies = ["clean"]
+
+[tasks.run]
+script = ["cargo run > image.ppm"]
+
+[tasks.view]
+command = "feh"
+args = ["image.ppm"]
+
+[tasks.test]
+command = "cargo"
+args = ["test"]
+
+[tasks.all]
+dependencies = ["build", "test", "run", "view"]
