@@ -19,9 +19,9 @@ impl Sphere {
 impl hittable::Hittable for Sphere {
     fn hit(&self, ray: Ray, t_min: f64, t_max: f64, rec: &mut hittable::HitRecord) -> bool {
         let r = ray.clone();
-        let oc: Vec3 = *r.origin() - self.center;
+        let oc: Vec3 = r.origin() - self.center;
         let a = r.direction().length_squared();
-        let half_b = oc.dot(*r.direction());
+        let half_b = oc.dot(r.direction());
         let c = oc.length_squared() - self.radius * self.radius;
         let discriminant = half_b * half_b - a * c;
         if discriminant > 0.0 {
