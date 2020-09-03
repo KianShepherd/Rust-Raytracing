@@ -8,7 +8,7 @@ mod vec3;
 fn ray_color(ray: ray::Ray, world: &hittables::Hittables<sphere::Sphere>) -> vec3::Vec3 {
     let mut hit_rec = hittable::HitRecord::new();
 
-    if world.hit(ray, 0.0, 100000.0, &mut hit_rec) {
+    if world.hit(ray, 0.0, f64::INFINITY, &mut hit_rec) {
         (hit_rec.normal.clone().unwrap() + vec3::Vec3::new(1.0, 1.0, 1.0)).scale(0.5)
     } else {
         let unit_dir = ray.direction().unit_vector();
@@ -28,11 +28,8 @@ fn main() {
     // World
     let world = hittables::Hittables {
         hittables: vec![
-            std::rc::Rc::new(sphere::Sphere::new(vec3::Vec3::new(0.0, 0.0, -1.0), 0.5)),
-            std::rc::Rc::new(sphere::Sphere::new(
-                vec3::Vec3::new(0.0, -100.5, -1.0),
-                100.0,
-            )),
+            sphere::Sphere::new(vec3::Vec3::new(0.0, 0.0, -1.0), 0.5),
+            sphere::Sphere::new(vec3::Vec3::new(0.0, -100.5, -1.0), 100.0),
         ],
     };
 
