@@ -10,3 +10,4 @@ authors = ["Kian Shepherd <Kianshepherd73@gmail.com>"]
 edition = "2018"
 
 [dependencies]
+rand = "*"
