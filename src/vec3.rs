@@ -5,6 +5,16 @@ pub struct Vec3 {
     z: f64,
 }
 
+fn clamp(val: f64, min: f64, max: f64) -> f64 {
+    if val < min {
+        min
+    } else if val > max {
+        max
+    } else {
+        val
+    }
+}
+
 impl Vec3 {
     pub fn new(_x: f64, _y: f64, _z: f64) -> Vec3 {
         Vec3 {
@@ -62,13 +72,12 @@ impl Vec3 {
         self.scale(1.0 / self.length())
     }
 
-    pub fn to_string(&self) -> String {
-        format!(
-            "{} {} {}",
-            (self.x * 255.999) as u8,
-            (self.y * 255.999) as u8,
-            (self.z * 255.999) as u8
-        )
+    pub fn to_string(&self, samples_per_pixel: usize) -> String {
+        let scale = 1.0 / samples_per_pixel as f64;
+        let r = (256.0 * clamp(self.x * scale, 0.0, 0.999)) as u8;
+        let g = (256.0 * clamp(self.y * scale, 0.0, 0.999)) as u8;
+        let b = (256.0 * clamp(self.z * scale, 0.0, 0.999)) as u8;
+        format!("{} {} {}", r, g, b)
     }
 }
 
