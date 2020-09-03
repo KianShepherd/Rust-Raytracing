@@ -53,7 +53,7 @@ fn main() {
     for j in 0..image_height {
         // progress check
         if j % ((image_height as f64 / progress_prints) as i32) == 0 {
-            eprintln!("{:.2}% done", (j as f64 / image_height as f64) * 100.0);
+            eprintln!("{:.2}% Done", (j as f64 / image_height as f64) * 100.0);
         }
 
         for i in 0..image_width {
@@ -69,6 +69,6 @@ fn main() {
             output = format!("{}\n{}", output, color.to_string());
         }
     }
-    eprintln!("\nDone.\n");
+    eprintln!("100.00% Done\n\n");
     println!("{}", output);
 }
