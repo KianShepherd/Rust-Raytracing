@@ -2,13 +2,12 @@ use crate::hittable;
 use crate::ray::Ray;
 use crate::vec3::Vec3;
 
+#[derive(Debug, Copy, Clone)]
 pub struct Sphere {
     center: Vec3,
     radius: f64,
 }
-
 impl Sphere {
-    #[allow(dead_code)]
     pub fn new(cen: Vec3, rad: f64) -> Sphere {
         Sphere {
             center: cen,

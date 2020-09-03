@@ -14,16 +14,22 @@ command = "cargo"
 args = ["build"]
 dependencies = ["clean"]
 
-[tasks.run]
+[tasks.runer]
 script = ["cargo run > image.ppm"]
 
 [tasks.view]
 command = "feh"
 args = ["image.ppm"]
 
-[tasks.test]
+[tasks.tests]
 command = "cargo"
 args = ["test"]
 
+[tasks.test]
+dependencies = ["build", "tests"]
+
+[tasks.run]
+dependencies = ["build", "runer", "view"]
+
 [tasks.all]
-dependencies = ["build", "test", "run", "view"]
+dependencies = ["build", "tests", "runer", "view"]

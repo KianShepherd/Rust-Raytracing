@@ -13,13 +13,14 @@ impl Vec3 {
             z: _z,
         }
     }
-
+    #[allow(dead_code)]
     pub fn x(&self) -> f64 {
         self.x
     }
     pub fn y(&self) -> f64 {
         self.y
     }
+    #[allow(dead_code)]
     pub fn z(&self) -> f64 {
         self.z
     }

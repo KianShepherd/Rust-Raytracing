@@ -5,11 +5,11 @@ mod sphere;
 mod vec3;
 // run with
 // cargo make all
-fn ray_color(ray: ray::Ray) -> vec3::Vec3 {
-    let t = hit_sphere(vec3::Vec3::new(0.0, 0.0, -1.0), 0.5, &ray);
-    if t > 0.0 {
-        let n: vec3::Vec3 = (ray.at(t) - vec3::Vec3::new(0.0, 0.0, -1.0)).unit_vector();
-        vec3::Vec3::new(n.x() + 1.0, n.y() + 1.0, n.z() + 1.0).scale(0.5)
+fn ray_color(ray: ray::Ray, world: &hittables::Hittables<sphere::Sphere>) -> vec3::Vec3 {
+    let mut hit_rec = hittable::HitRecord::new();
+
+    if world.hit(ray, 0.0, 100000.0, &mut hit_rec) {
+        (hit_rec.normal.clone().unwrap() + vec3::Vec3::new(1.0, 1.0, 1.0)).scale(0.5)
     } else {
         let unit_dir = ray.direction().unit_vector();
         let t = 0.5 * (unit_dir.y() + 1.0);
@@ -19,25 +19,22 @@ fn ray_color(ray: ray::Ray) -> vec3::Vec3 {
     }
 }
 
-fn hit_sphere(center: vec3::Vec3, radius: f64, ray: &ray::Ray) -> f64 {
-    let r = ray.clone();
-    let oc: vec3::Vec3 = *r.origin() - center;
-    let a = r.direction().length_squared();
-    let half_b = oc.dot(*r.direction());
-    let c = oc.length_squared() - radius * radius;
-    let discriminant = half_b * half_b - a * c;
-    if discriminant < 0.0 {
-        -1.0
-    } else {
-        (-half_b - discriminant.sqrt()) / a
-    }
-}
-
 fn main() {
     // Image
     let aspect_ratio = 16.0 / 9.0;
     let image_width = 400;
     let image_height = (image_width as f64 / aspect_ratio) as i32;
+
+    // World
+    let world = hittables::Hittables {
+        hittables: vec![
+            std::rc::Rc::new(sphere::Sphere::new(vec3::Vec3::new(0.0, 0.0, -1.0), 0.5)),
+            std::rc::Rc::new(sphere::Sphere::new(
+                vec3::Vec3::new(0.0, -100.5, -1.0),
+                100.0,
+            )),
+        ],
+    };
 
     // Camera
     let viewport_height = 2.0;
@@ -71,7 +68,7 @@ fn main() {
                     lower_left_corner + horizontal.scale(u) + vertical.scale(v) - origin,
                 )
             };
-            let color = ray_color(r);
+            let color = ray_color(r, &world);
             output = format!("{}\n{}", output, color.to_string());
         }
     }
