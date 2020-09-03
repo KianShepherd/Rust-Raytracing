@@ -1,4 +1,7 @@
+mod hittable;
+mod hittables;
 mod ray;
+mod sphere;
 mod vec3;
 // run with
 // cargo make all
@@ -13,20 +16,6 @@ fn ray_color(ray: ray::Ray) -> vec3::Vec3 {
         let one = vec3::Vec3::new(1.0, 1.0, 1.0).scale(1.0 - t);
         let two = vec3::Vec3::new(0.5, 0.7, 1.0).scale(t);
         one + two
-    }
-}
-#[allow(dead_code)]
-fn hit_sphere_old(center: vec3::Vec3, radius: f64, ray: &ray::Ray) -> f64 {
-    let r = ray.clone();
-    let oc: vec3::Vec3 = *r.origin() - center;
-    let a = r.direction().dot(*r.direction());
-    let b = 2.0 * oc.dot(*r.direction());
-    let c = oc.dot(oc) - radius * radius;
-    let discriminant = b * b - 4.0 * a * c;
-    if discriminant < 0.0 {
-        -1.0
-    } else {
-        (-b - discriminant.sqrt()) / (2.0 * a)
     }
 }
 

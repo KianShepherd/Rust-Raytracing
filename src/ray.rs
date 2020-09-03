@@ -1,13 +1,11 @@
 use crate::vec3::Vec3;
 
-#[allow(dead_code)]
 #[derive(Debug, Copy, Clone)]
 pub struct Ray {
     origin: Vec3,
     direction: Vec3,
 }
 
-#[allow(dead_code)]
 impl Ray {
     pub fn new(orig: Vec3, dir: Vec3) -> Ray {
         Ray {

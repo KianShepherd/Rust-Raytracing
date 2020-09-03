@@ -5,7 +5,6 @@ pub struct Vec3 {
     z: f64,
 }
 
-#[allow(dead_code)]
 impl Vec3 {
     pub fn new(_x: f64, _y: f64, _z: f64) -> Vec3 {
         Vec3 {
@@ -24,7 +23,7 @@ impl Vec3 {
     pub fn z(&self) -> f64 {
         self.z
     }
-
+    #[allow(dead_code)]
     pub fn get(&self, idx: usize) -> f64 {
         match idx {
             0 => self.x,
@@ -44,6 +43,7 @@ impl Vec3 {
     pub fn dot(&self, v: Vec3) -> f64 {
         self.x * v.x + self.y * v.y + self.z * v.z
     }
+    #[allow(dead_code)]
     pub fn cross(&self, v: Vec3) -> Vec3 {
         Vec3 {
             x: self.y * v.z - self.z * v.y,
