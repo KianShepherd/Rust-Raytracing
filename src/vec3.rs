@@ -51,7 +51,7 @@ impl Vec3 {
             z: self.x * v.y - self.y * v.x,
         }
     }
-    fn length_squared(&self) -> f64 {
+    pub fn length_squared(&self) -> f64 {
         self.x * self.x + self.y * self.y + self.z * self.z
     }
     pub fn length(&self) -> f64 {

@@ -3,30 +3,51 @@ mod vec3;
 // run with
 // cargo make all
 fn ray_color(ray: ray::Ray) -> vec3::Vec3 {
-    if hit_sphere(vec3::Vec3::new(0.0, 0.0, -1.0), 0.5, &ray) {
-        return vec3::Vec3::new(1.0, 0.0, 0.0);
+    let t = hit_sphere(vec3::Vec3::new(0.0, 0.0, -1.0), 0.5, &ray);
+    if t > 0.0 {
+        let n: vec3::Vec3 = (ray.at(t) - vec3::Vec3::new(0.0, 0.0, -1.0)).unit_vector();
+        vec3::Vec3::new(n.x() + 1.0, n.y() + 1.0, n.z() + 1.0).scale(0.5)
+    } else {
+        let unit_dir = ray.direction().unit_vector();
+        let t = 0.5 * (unit_dir.y() + 1.0);
+        let one = vec3::Vec3::new(1.0, 1.0, 1.0).scale(1.0 - t);
+        let two = vec3::Vec3::new(0.5, 0.7, 1.0).scale(t);
+        one + two
     }
-    let unit_dir = ray.direction().unit_vector();
-    let t = 0.5 * (unit_dir.y() + 1.0);
-    let one = vec3::Vec3::new(1.0, 1.0, 1.0).scale(1.0 - t);
-    let two = vec3::Vec3::new(0.5, 0.7, 1.0).scale(t);
-    one + two
 }
-
-fn hit_sphere(center: vec3::Vec3, radius: f64, ray: &ray::Ray) -> bool {
+#[allow(dead_code)]
+fn hit_sphere_old(center: vec3::Vec3, radius: f64, ray: &ray::Ray) -> f64 {
     let r = ray.clone();
     let oc: vec3::Vec3 = *r.origin() - center;
     let a = r.direction().dot(*r.direction());
     let b = 2.0 * oc.dot(*r.direction());
     let c = oc.dot(oc) - radius * radius;
     let discriminant = b * b - 4.0 * a * c;
-    discriminant > 0.0
+    if discriminant < 0.0 {
+        -1.0
+    } else {
+        (-b - discriminant.sqrt()) / (2.0 * a)
+    }
+}
+
+fn hit_sphere(center: vec3::Vec3, radius: f64, ray: &ray::Ray) -> f64 {
+    let r = ray.clone();
+    let oc: vec3::Vec3 = *r.origin() - center;
+    let a = r.direction().length_squared();
+    let half_b = oc.dot(*r.direction());
+    let c = oc.length_squared() - radius * radius;
+    let discriminant = half_b * half_b - a * c;
+    if discriminant < 0.0 {
+        -1.0
+    } else {
+        (-half_b - discriminant.sqrt()) / a
+    }
 }
 
 fn main() {
     // Image
     let aspect_ratio = 16.0 / 9.0;
-    let image_width = 720;
+    let image_width = 400;
     let image_height = (image_width as f64 / aspect_ratio) as i32;
 
     // Camera
