@@ -1,20 +1,68 @@
+mod ray;
+mod vec3;
 // run with
 // cargo make all
+fn ray_color(ray: ray::Ray) -> vec3::Vec3 {
+    if hit_sphere(vec3::Vec3::new(0.0, 0.0, -1.0), 0.5, &ray) {
+        return vec3::Vec3::new(1.0, 0.0, 0.0);
+    }
+    let unit_dir = ray.direction().unit_vector();
+    let t = 0.5 * (unit_dir.y() + 1.0);
+    let one = vec3::Vec3::new(1.0, 1.0, 1.0).scale(1.0 - t);
+    let two = vec3::Vec3::new(0.5, 0.7, 1.0).scale(t);
+    one + two
+}
+
+fn hit_sphere(center: vec3::Vec3, radius: f64, ray: &ray::Ray) -> bool {
+    let r = ray.clone();
+    let oc: vec3::Vec3 = *r.origin() - center;
+    let a = r.direction().dot(*r.direction());
+    let b = 2.0 * oc.dot(*r.direction());
+    let c = oc.dot(oc) - radius * radius;
+    let discriminant = b * b - 4.0 * a * c;
+    discriminant > 0.0
+}
 
 fn main() {
-    let image_width = 256;
-    let image_height = 256;
+    // Image
+    let aspect_ratio = 16.0 / 9.0;
+    let image_width = 720;
+    let image_height = (image_width as f64 / aspect_ratio) as i32;
+
+    // Camera
+    let viewport_height = 2.0;
+    let viewport_width = aspect_ratio * viewport_height;
+    let focal_length = 1.0;
+
+    let origin = vec3::Vec3::new(0.0, 0.0, 0.0);
+    let horizontal = vec3::Vec3::new(viewport_width, 0.0, 0.0);
+    let vertical = vec3::Vec3::new(0.0, viewport_height, 0.0);
+    let lower_left_corner = origin
+        - horizontal.scale(0.5)
+        - vertical.scale(0.5)
+        - vec3::Vec3::new(0.0, 0.0, focal_length);
+
+    // Render
     let mut output = format!("P3\n{} {}\n255\n", image_width, image_height);
-    let b = (0.25 * 255.99) as i32;
+    let progress_prints = 25.0;
+
     for j in 0..image_height {
-        if j % ((image_height as f64 / 11.0) as i32) == 0 {
+        // progress check
+        if j % ((image_height as f64 / progress_prints) as i32) == 0 {
             eprintln!("{:.2}% done", (j as f64 / image_height as f64) * 100.0);
         }
+
         for i in 0..image_width {
-            let r = ((i as f64 / (image_width - 1) as f64) * 255.999) as i32;
-            let g =
-                ((((image_height - j) - 1) as f64 / (image_height - 1) as f64) * 255.999) as i32;
-            output = format!("{}\n{} {} {}", output, r, g, b);
+            let r = {
+                let u = (i as f64) / (image_width - 1) as f64;
+                let v = (image_height - (j + 1)) as f64 / (image_height - 1) as f64;
+                ray::Ray::new(
+                    origin.clone(),
+                    lower_left_corner + horizontal.scale(u) + vertical.scale(v) - origin,
+                )
+            };
+            let color = ray_color(r);
+            output = format!("{}\n{}", output, color.to_string());
         }
     }
     eprintln!("\nDone.\n");
