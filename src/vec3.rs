@@ -74,9 +74,9 @@ impl Vec3 {
 
     pub fn to_string(&self, samples_per_pixel: usize) -> String {
         let scale = 1.0 / samples_per_pixel as f64;
-        let r = (256.0 * clamp(self.x * scale, 0.0, 0.999)) as u8;
-        let g = (256.0 * clamp(self.y * scale, 0.0, 0.999)) as u8;
-        let b = (256.0 * clamp(self.z * scale, 0.0, 0.999)) as u8;
+        let r = (256.0 * clamp((self.x * scale).sqrt(), 0.0, 0.999)) as u8;
+        let g = (256.0 * clamp((self.y * scale).sqrt(), 0.0, 0.999)) as u8;
+        let b = (256.0 * clamp((self.z * scale).sqrt(), 0.0, 0.999)) as u8;
         format!("{} {} {}", r, g, b)
     }
 }
