@@ -80,13 +80,12 @@ fn ray_color(
             ),
             world,
             depth - 1,
-        )
-        .scale(0.5)
+        ) * 0.5
     } else {
         let unit_dir = ray.direction().unit_vector();
         let t = 0.5 * (unit_dir.y() + 1.0);
-        let one = vec3::Vec3::new(1.0, 1.0, 1.0).scale(1.0 - t);
-        let two = vec3::Vec3::new(0.5, 0.7, 1.0).scale(t);
+        let one = vec3::Vec3::new(1.0, 1.0, 1.0) * (1.0 - t);
+        let two = vec3::Vec3::new(0.5, 0.7, 1.0) * t;
         one + two
     }
 }
@@ -112,7 +111,7 @@ fn main() {
 
     // Render
     let mut output = format!("P3\n{} {}\n255\n", image_width, image_height);
-    let progress_prints = 25.0;
+    let progress_prints = image_width as f64 / 16.0;
 
     for j in 0..image_height {
         // progress check

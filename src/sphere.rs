@@ -33,13 +33,13 @@ impl hittable::Hittable for Sphere {
             if temp1 < t_max && temp1 > t_min {
                 rec.t = Some(temp1);
                 rec.p = Some(r.at(rec.t.unwrap()));
-                let outward_normal = (rec.p.unwrap() - self.center).scale(1.0 / self.radius);
+                let outward_normal = (rec.p.unwrap() - self.center) * (1.0 / self.radius);
                 rec.set_face_normal(r, outward_normal);
                 true
             } else if temp2 < t_max && temp2 > t_min {
                 rec.t = Some(temp1);
                 rec.p = Some(r.at(rec.t.unwrap()));
-                let outward_normal = (rec.p.unwrap() - self.center).scale(1.0 / self.radius);
+                let outward_normal = (rec.p.unwrap() - self.center) * (1.0 / self.radius);
                 rec.set_face_normal(r, outward_normal);
                 true
             } else {
