@@ -20,6 +20,6 @@ impl Ray {
         self.direction.clone()
     }
     pub fn at(&self, t: f64) -> Vec3 {
-        self.origin + self.direction.scale(t)
+        self.origin + self.direction * t
     }
 }

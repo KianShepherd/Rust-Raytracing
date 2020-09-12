@@ -34,22 +34,6 @@ impl Vec3 {
     pub fn z(&self) -> f64 {
         self.z
     }
-    #[allow(dead_code)]
-    pub fn get(&self, idx: usize) -> f64 {
-        match idx {
-            0 => self.x,
-            1 => self.y,
-            2 => self.z,
-            _ => panic!("invalid idx: {} for vec3", idx),
-        }
-    }
-    pub fn scale(self, scale_factor: f64) -> Vec3 {
-        Vec3 {
-            x: self.x * scale_factor,
-            y: self.y * scale_factor,
-            z: self.z * scale_factor,
-        }
-    }
 
     pub fn dot(&self, v: Vec3) -> f64 {
         self.x * v.x + self.y * v.y + self.z * v.z
@@ -69,14 +53,14 @@ impl Vec3 {
         self.length_squared().sqrt()
     }
     pub fn unit_vector(&self) -> Vec3 {
-        self.scale(1.0 / self.length())
+        self.clone() * (1.0 / self.length())
     }
 
     pub fn to_string(&self, samples_per_pixel: usize) -> String {
         let scale = 1.0 / samples_per_pixel as f64;
-        let r = (256.0 * clamp(self.x * scale, 0.0, 0.999)) as u8;
-        let g = (256.0 * clamp(self.y * scale, 0.0, 0.999)) as u8;
-        let b = (256.0 * clamp(self.z * scale, 0.0, 0.999)) as u8;
+        let r = (256.0 * clamp((self.x * scale).sqrt(), 0.0, 0.999)) as u8;
+        let g = (256.0 * clamp((self.y * scale).sqrt(), 0.0, 0.999)) as u8;
+        let b = (256.0 * clamp((self.z * scale).sqrt(), 0.0, 0.999)) as u8;
         format!("{} {} {}", r, g, b)
     }
 }
@@ -103,9 +87,8 @@ impl std::ops::Sub for Vec3 {
     }
 }
 
-impl std::ops::Mul for Vec3 {
+impl std::ops::Mul<Vec3> for Vec3 {
     type Output = Vec3;
-
     fn mul(self, rhs: Vec3) -> Vec3 {
         Vec3 {
             x: self.x * rhs.x,
@@ -115,9 +98,19 @@ impl std::ops::Mul for Vec3 {
     }
 }
 
+impl std::ops::Mul<f64> for Vec3 {
+    type Output = Vec3;
+    fn mul(self, rhs: f64) -> Vec3 {
+        Vec3 {
+            x: self.x * rhs,
+            y: self.y * rhs,
+            z: self.z * rhs,
+        }
+    }
+}
+
 impl std::ops::Div for Vec3 {
     type Output = Vec3;
-
     fn div(self, rhs: Vec3) -> Vec3 {
         Vec3 {
             x: self.x / rhs.x,
