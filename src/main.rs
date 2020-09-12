@@ -2,6 +2,7 @@ mod camera;
 mod hittable;
 mod hittables;
 use rand::Rng;
+mod material;
 mod ray;
 mod sphere;
 mod vec3;
@@ -66,21 +67,12 @@ fn ray_color(
     }
 
     if world.hit(ray, 0.001, f64::INFINITY, &mut hit_rec) {
-        // Quick
-        // let target = hit_rec.p.clone().unwrap() + hit_rec.normal.clone().unwrap() + random_unit_vec3();
-        // Lambertian
-        let target =
-            hit_rec.p.clone().unwrap() + hit_rec.normal.clone().unwrap() + lamber_unit_vec3();
-        // Hemisphere
-        // let target = hit_rec.p.clone().unwrap() + hit_rec.normal.clone().unwrap() + random_in_hemisphere(hit_rec.normal.clone().unwrap());
-        ray_color(
-            ray::Ray::new(
-                hit_rec.p.clone().unwrap(),
-                target - hit_rec.p.clone().unwrap(),
-            ),
-            world,
-            depth - 1,
-        ) * 0.5
+        let color = &mut vec3::Vec3::new(0.0, 0.0, 0.0);
+        let res = material::scatter(ray, hit_rec, color, hit_rec.material.unwrap());
+        match res {
+            Some(result) => *color * ray_color(result, world, depth - 1),
+            None => vec3::Vec3::new(0.0, 0.0, 0.0),
+        }
     } else {
         let unit_dir = ray.direction().unit_vector();
         let t = 0.5 * (unit_dir.y() + 1.0);
@@ -101,8 +93,26 @@ fn main() {
     // World
     let world = hittables::Hittables {
         hittables: vec![
-            sphere::Sphere::new(vec3::Vec3::new(0.0, 0.0, -1.0), 0.5),
-            sphere::Sphere::new(vec3::Vec3::new(0.0, -100.5, -1.0), 100.0),
+            sphere::Sphere::new(
+                vec3::Vec3::new(0.0, 0.0, -1.0),
+                0.5,
+                material::Material::Lambertian(vec3::Vec3::new(0.7, 0.3, 0.3)),
+            ),
+            sphere::Sphere::new(
+                vec3::Vec3::new(0.0, -100.5, -1.0),
+                100.0,
+                material::Material::Lambertian(vec3::Vec3::new(0.8, 0.8, 0.0)),
+            ),
+            sphere::Sphere::new(
+                vec3::Vec3::new(-1.0, 0.0, -1.0),
+                0.5,
+                material::Material::Metal(vec3::Vec3::new(0.8, 0.8, 0.8), 0.3),
+            ),
+            sphere::Sphere::new(
+                vec3::Vec3::new(1.0, 0.0, -1.0),
+                0.5,
+                material::Material::Metal(vec3::Vec3::new(0.8, 0.6, 0.2), 1.0),
+            ),
         ],
     };
 

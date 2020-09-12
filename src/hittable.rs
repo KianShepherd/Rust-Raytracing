@@ -1,10 +1,13 @@
+use crate::material::Material;
 use crate::ray::Ray;
 use crate::vec3::Vec3;
 
+#[derive(Debug, Copy, Clone)]
 pub struct HitRecord {
     pub p: Option<Vec3>,
     pub normal: Option<Vec3>,
     pub t: Option<f64>,
+    pub material: Option<Material>,
     front_face: Option<bool>,
 }
 
@@ -16,6 +19,7 @@ impl HitRecord {
             normal: None,
             t: None,
             front_face: None,
+            material: None,
         }
     }
     pub fn get_p(&self) -> Option<Vec3> {
@@ -46,6 +50,7 @@ impl HitRecord {
         self.t = r.t.clone();
         self.normal = r.normal.clone();
         self.front_face = r.front_face.clone();
+        self.material = r.material.clone();
     }
 }
 

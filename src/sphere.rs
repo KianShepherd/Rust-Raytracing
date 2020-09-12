@@ -1,4 +1,5 @@
 use crate::hittable;
+use crate::material;
 use crate::ray::Ray;
 use crate::vec3::Vec3;
 
@@ -6,12 +7,14 @@ use crate::vec3::Vec3;
 pub struct Sphere {
     center: Vec3,
     radius: f64,
+    material: material::Material,
 }
 impl Sphere {
-    pub fn new(cen: Vec3, rad: f64) -> Sphere {
+    pub fn new(cen: Vec3, rad: f64, mat: material::Material) -> Sphere {
         Sphere {
             center: cen,
             radius: rad,
+            material: mat,
         }
     }
 }
@@ -35,12 +38,14 @@ impl hittable::Hittable for Sphere {
                 rec.p = Some(r.at(rec.t.unwrap()));
                 let outward_normal = (rec.p.unwrap() - self.center) * (1.0 / self.radius);
                 rec.set_face_normal(r, outward_normal);
+                rec.material = Some(self.material.clone());
                 true
             } else if temp2 < t_max && temp2 > t_min {
                 rec.t = Some(temp1);
                 rec.p = Some(r.at(rec.t.unwrap()));
                 let outward_normal = (rec.p.unwrap() - self.center) * (1.0 / self.radius);
                 rec.set_face_normal(r, outward_normal);
+                rec.material = Some(self.material.clone());
                 true
             } else {
                 false
