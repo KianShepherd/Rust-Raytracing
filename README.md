@@ -6,3 +6,6 @@ https://raytracing.github.io/books/RayTracingInOneWeekend.html
 cargo-make:  is used for building the project.
 though it can be manually made, the makefile simplifies the build and testing 
 process as well as opening the created image in feh to quickly view.
+`cargo install cargo-make` 
+
+`cargo make run`
