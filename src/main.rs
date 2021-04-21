@@ -111,7 +111,7 @@ fn main() {
     let look_at = vec3::Vec3::new(0.0, 0.0, 0.0);
     let v_up = vec3::Vec3::new(0.0, 1.0, 0.0);
     let focal_distance = (look_from - look_at).length();
-    let aperature = 0.01;
+    let aperture = 0.01;
     let image_width = 400;
     let image_height = (image_width as f64 / aspect_ratio) as i32;
     let progress_prints = image_width as f64 / 16.0;
@@ -122,7 +122,7 @@ fn main() {
     let octaves = 2;
     let frequency = 0.15;
     let lacunarity = 0.5;
-    let cam = camera::Camera::new(look_from, look_at, v_up, v_fov, aspect_ratio, aperature, focal_distance);
+    let cam = camera::Camera::new(look_from, look_at, v_up, v_fov, aspect_ratio, aperture, focal_distance);
     let noise = noise::Noise::new(terrain_resolution + 1, octaves, frequency, lacunarity);
     let colour_map = colourmap::ColourMap::new_default();
 
