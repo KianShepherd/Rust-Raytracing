@@ -119,11 +119,11 @@ fn main() {
     let v_up = vec3::Vec3::new(0.0, 1.0, 0.0);
     let focal_distance = (look_from - look_at).length();
     let aperture = 0.01;
-    let image_width = 400;
+    let image_width = 300;
     let image_height = (image_width as f64 / aspect_ratio) as i32;
     let progress_prints = image_width as f64 / 16.0;
-    let samples_per_pixel = 25;
-    let max_depth = 35;
+    let samples_per_pixel = 15;
+    let max_depth = 25;
     let mut image = RgbImage::new(image_width as u32, image_height as u32);
     let terrain_resolution = 30;
     let octaves = 2;

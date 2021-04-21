@@ -22,8 +22,9 @@ impl ColourMap {
     pub fn new_default() -> Self {
         let mut colours = vec![];
         colours.push(ColourData {cutoff: 0.75, colour: Vec3::new(1.0, 1.0, 1.0)});
-        colours.push(ColourData {cutoff: -0.1, colour: Vec3::new(0.2, 0.9, 0.4)});
-        colours.push(ColourData {cutoff: -0.45, colour: Vec3::new(0.1, 0.6, 0.2)});
+        colours.push(ColourData {cutoff: 0.2, colour: Vec3::new(0.4, 0.5, 0.5)});
+        colours.push(ColourData {cutoff: -0.25, colour: Vec3::new(0.2, 0.9, 0.4)});
+        colours.push(ColourData {cutoff: -0.55, colour: Vec3::new(0.1, 0.6, 0.2)});
         colours.push(ColourData {cutoff: -0.7, colour: Vec3::new(0.05, 0.3, 0.85)});
 
         ColourMap {
