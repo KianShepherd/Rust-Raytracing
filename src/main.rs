@@ -4,6 +4,8 @@ mod hittables;
 use rand::Rng;
 use crate::hittable::Hittable;
 use image::RgbImage;
+use crate::hittables::Hittables;
+use crate::sphere::Sphere;
 
 mod material;
 mod ray;
@@ -106,6 +108,8 @@ fn ray_color(
 
 #[allow(unused_variables)]
 fn main() {
+    let testing_scene = true;
+
     let terrain_size = 1024.0;
     let height_scale = 175.0;
     let aspect_ratio = 16.0 / 9.0;
@@ -118,38 +122,70 @@ fn main() {
     let image_width = 400;
     let image_height = (image_width as f64 / aspect_ratio) as i32;
     let progress_prints = image_width as f64 / 16.0;
-    let samples_per_pixel = 10;
-    let max_depth = 15;
+    let samples_per_pixel = 25;
+    let max_depth = 35;
     let mut image = RgbImage::new(image_width as u32, image_height as u32);
     let terrain_resolution = 30;
     let octaves = 2;
     let frequency = 0.15;
     let lacunarity = 0.5;
-    let cam = camera::Camera::new(look_from, look_at, v_up, v_fov, aspect_ratio, aperture, focal_distance);
+    let camera1 = camera::Camera::new(look_from, look_at, v_up, v_fov, aspect_ratio, aperture, focal_distance);
     let noise = noise::Noise::new(terrain_resolution + 1, octaves, frequency, lacunarity);
     let colour_map = colour_map::ColourMap::new_default();
 
     //let mut terrain = terrain::Terrain::new(terrain_size, terrain_size, 1);
     let mut terrain = terrain::Terrain::new(terrain_size, terrain_size, terrain_resolution);
     //let mut world = terrain.get_triangles(None, None, 0.0);
-    let mut world = terrain.get_triangles(Some(noise), Some(colour_map), height_scale);
-    world.push(Box::new(sphere::Sphere::new(
+    let mut world1: Hittables<dyn Hittable> = terrain.get_triangles(Some(noise), Some(colour_map), height_scale);
+    world1.push(Box::new(sphere::Sphere::new(
         vec3::Vec3::new(0.0, 150.0, 50.0),
         50.0,
         material::Material::Lambertian(vec3::Vec3::new(0.2, 0.6, 0.9)),
     )));
-    world.push(Box::new(sphere::Sphere::new(
+    world1.push(Box::new(sphere::Sphere::new(
         vec3::Vec3::new(-150.0, 100.0, 0.0),
         50.0,
         material::Material::Metal(vec3::Vec3::new(0.8, 0.6, 0.2), 1.0),
     )));
-    world.push(Box::new(sphere::Sphere::new(
+    world1.push(Box::new(sphere::Sphere::new(
         vec3::Vec3::new(150.0, 250.0, 100.0),
         50.0,
         material::Material::Lambertian(vec3::Vec3::new(0.8, 0.1, 0.6)),
     )));
 
-    world.push_light(vec3::Vec3::new(-1500.0, 900.0, 1200.0));
+    world1.push_light(vec3::Vec3::new(-1500.0, 900.0, 1200.0));
+
+    let camera2 = camera::Camera::new(vec3::Vec3::new(0.0, 0.0, 0.0), vec3::Vec3::new(0.0, 0.0, -1.0), vec3::Vec3::new(0.0, 1.0, 0.0), 90.0, aspect_ratio, 0.01, 1.0);
+    let world2: Hittables<dyn Hittable> = {
+        let world_objects: Vec<Box<dyn Hittable>> = {
+            let mut objects: Vec<Box<dyn Hittable>> = vec![];
+            objects.push(Box::new(
+                sphere::Sphere::new(
+                    vec3::Vec3::new(0.0, -100.5, -1.0),
+                    100.0,
+                    material::Material::Lambertian(vec3::Vec3::new(0.8, 0.8, 0.0)))));
+            objects.push(Box::new(
+                sphere::Sphere::new(
+                    vec3::Vec3::new(0.0, 0.0, -1.0),
+                    0.5,
+                    material::Material::Lambertian(vec3::Vec3::new(0.1, 0.2, 0.5)))));
+            objects.push(Box::new(
+                sphere::Sphere::new(
+                    vec3::Vec3::new(1.0, 0.0, -1.0),
+                    0.5,
+                    material::Material::Metal(vec3::Vec3::new(0.8, 0.6, 0.2), 0.1))));
+            objects.push(Box::new(
+                sphere::Sphere::new(
+                    vec3::Vec3::new(-1.0, 0.0, -1.0),
+                    0.5,
+                    material::Material::Dielectric(1.5))));
+            objects
+        };
+        Hittables {
+            lights: vec![],
+            hittables: world_objects,
+        }
+    };
 
     for j in 0..image_height {
         // progress check
@@ -164,9 +200,17 @@ fn main() {
                     let u = ((i as f64) + random()) / (image_width - 1) as f64;
                     let v =
                         ((image_height - (j + 1)) as f64 + random()) / (image_height - 1) as f64;
-                    cam.get_ray(u, v)
+                    if testing_scene {
+                        camera2.get_ray(u, v)
+                    } else {
+                        camera1.get_ray(u, v)
+                    }
                 };
-                pixel_color = pixel_color + ray_color(r, &world, max_depth);
+                if testing_scene {
+                    pixel_color = pixel_color + ray_color(r, &world2, max_depth);
+                } else {
+                    pixel_color = pixel_color + ray_color(r, &world1, max_depth);
+                }
             }
             image.put_pixel(i as u32, j as u32, pixel_color.to_rgb(samples_per_pixel));
         }
