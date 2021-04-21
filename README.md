@@ -2,11 +2,9 @@
 A rust implimentation of Raytracing in a weekend
 https://raytracing.github.io/books/RayTracingInOneWeekend.html
 
-## Requires 
-cargo-make:  is used for building the project.
-though it can be manually made, the makefile simplifies the build and testing 
-process as well as opening the created image in feh to quickly view.
+## How to use
+No extra requirements to run, however it is highly recommended to compile in
+release mode to speed up the program if using it for larger renders. Program
+will output to a file called image.jpg in the current working directory. 
 
-`cargo install cargo-make` 
 
-`cargo make run`

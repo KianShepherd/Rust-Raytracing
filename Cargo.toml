@@ -1,6 +1,7 @@
 [package]
 name = "raytracing"
-description = "Raytracing in one weekend in rust."
+description = """Raytracing in one weekend in rust.
+Continued into a triangle mesh generating procedural terrain."""
 readme = "README.md"
 repository = "https://github.com/KianShepherd/raytracing"
 license = "MIT OR Apache-2.0"
