@@ -1,7 +1,6 @@
 use crate::ray::Ray;
 use crate::vec3::Vec3;
 use crate::{hittable::HitRecord, random_unit_vec3, random_f64};
-use std::cmp::min;
 
 #[derive(Debug, Copy, Clone)]
 pub enum Material {
@@ -79,7 +78,7 @@ fn dielectric_scatter(
     let reflected = reflect(ray.direction().unit_vector(), rec.normal.unwrap());
     let outward_normal: Vec3;
     let ni_over_nt: f64;
-    let mut cosine: f64;
+    let cosine: f64;
 
     if ray.direction().unit_vector().dot(rec.normal.unwrap()) > 0.0 {
         outward_normal = -rec.normal.unwrap();

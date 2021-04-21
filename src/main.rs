@@ -5,7 +5,6 @@ use rand::Rng;
 use crate::hittable::Hittable;
 use image::RgbImage;
 use crate::hittables::Hittables;
-use crate::sphere::Sphere;
 
 mod material;
 mod ray;
