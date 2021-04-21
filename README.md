@@ -19,6 +19,16 @@ feh. If feh is not present on your system you can either edit the script
 to open the image in the image viewer of your choice or simply run the 
 program and open the generated image afterwords.
 
+```
+./release.sh
+```
+
+or
+
+```
+cargo run --release
+```
+
 ## The Scene
 The program generates a procedural triangle mesh terrain to raytrace against 
 by using a perlin noise function as a height map. It also maps different 
