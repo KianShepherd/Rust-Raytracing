@@ -7,10 +7,11 @@ pub struct Triangle {
     points: Vec<Vec3>,
     normal: Vec3,
     material: Material,
+    culling: bool,
 }
 
 impl Triangle {
-    pub fn new(point1: Vec3, point2: Vec3, point3: Vec3, mat: Material) -> Triangle {
+    pub fn new(point1: Vec3, point2: Vec3, point3: Vec3, mat: Material, cull_back_face: bool) -> Triangle {
         let points_ = {
             let mut points = vec![];
             points.push(point1);
@@ -28,6 +29,7 @@ impl Triangle {
             points: points_,
             normal: normal_,
             material: mat,
+            culling: cull_back_face,
         }
     }
 }
@@ -43,7 +45,9 @@ impl hittable::Hittable for Triangle {
 
         let h = ray.direction().cross(edge2);
         let a = edge1.dot(h);
-        if a < t_min { return false; }
+        if self.culling {
+            if a < t_min { return false; }
+        }
 
         let f = 1.0 / a;
         let s = ray.origin() - vertex0;

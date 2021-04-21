@@ -71,10 +71,10 @@ impl Terrain {
                         },
                     }
                     hittables.push(Box::new(Triangle::new(
-                        i0j1, i0j0, i1j0, Lambertian(color1)
+                        i0j1, i0j0, i1j0, Lambertian(color1), false
                     )));
                     hittables.push(Box::new(Triangle::new(
-                        i1j0, i1j1, i0j1, Lambertian(color2)
+                        i1j0, i1j1, i0j1, Lambertian(color2), false
                     )));
                 }
             }

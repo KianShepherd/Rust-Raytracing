@@ -2,9 +2,9 @@ use image::Rgb;
 
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub struct Vec3 {
-    x: f64,
-    y: f64,
-    z: f64,
+    pub x: f64,
+    pub y: f64,
+    pub z: f64,
 }
 
 fn clamp(val: f64, min: f64, max: f64) -> f64 {

@@ -14,6 +14,8 @@ mod terrain;
 mod noise;
 mod colourmap;
 
+const LIGHT_LOCATION: vec3::Vec3 = vec3::Vec3 { x: -1500.0, y: 900.0, z: 1200.0};
+
 // run with
 // cargo make run
 fn random() -> f64 {
@@ -69,6 +71,7 @@ fn ray_color(
     depth: i32,
 ) -> vec3::Vec3 {
     let mut hit_rec = hittable::HitRecord::new();
+    let bias = 0.01;
 
     if depth <= 0 {
         return vec3::Vec3::new(0.0, 0.0, 0.0);
@@ -78,7 +81,15 @@ fn ray_color(
         let color = &mut vec3::Vec3::new(0.0, 0.0, 0.0);
         let res = material::scatter(ray, hit_rec, color, hit_rec.material.unwrap());
         match res {
-            Some(result) => *color * ray_color(result, world, depth - 1),
+            Some(result) => {
+                let light_direction = (LIGHT_LOCATION - hit_rec.p.unwrap()).unit_vector();
+                let point_of_intersection = hit_rec.p.unwrap() + (light_direction * bias);
+                let mut in_shadow = vec3::Vec3::new(1.0, 1.0, 1.0);
+                if world.hit(ray::Ray::new(point_of_intersection, light_direction), 0.001, f64::INFINITY, &mut hittable::HitRecord::new()) {
+                    in_shadow = vec3::Vec3::new(0.2, 0.2, 0.2);
+                }
+                *color * ray_color(result, world, depth - 1) * in_shadow
+            },
             None => vec3::Vec3::new(0.0, 0.0, 0.0),
         }
     } else {
@@ -92,42 +103,42 @@ fn ray_color(
 
 #[allow(unused_variables)]
 fn main() {
-    // Image
+    let terrain_size = 1024.0;
+    let height_scale = 175.0;
     let aspect_ratio = 16.0 / 9.0;
-    let image_width = 400;
+    let v_fov = 90.0;
+    let look_from = vec3::Vec3::new(0.0, 3.5 * height_scale, terrain_size * 0.6);
+    let look_at = vec3::Vec3::new(0.0, 0.0, 0.0);
+    let v_up = vec3::Vec3::new(0.0, 1.0, 0.0);
+    let image_width = 720;
     let image_height = (image_width as f64 / aspect_ratio) as i32;
-    let samples_per_pixel = 15;
+    let samples_per_pixel = 25;
     let max_depth = 25;
     let mut image = RgbImage::new(image_width as u32, image_height as u32);
-
-    // World
-    let terrain_size = 1024.0;
-    let terrain_resolution = 1;
-    let height_scale = 175.0;
+    let terrain_resolution = 50;
     let octaves = 2;
     let frequency = 0.15;
     let lacunarity = 0.5;
-    //                                                                                     / 3.0                    * 0.95
-    let cam = camera::Camera::new(vec3::Vec3::new(0.0, terrain_size / 5.0, terrain_size * 0.5));
+    let cam = camera::Camera::new(look_from, look_at, v_up, v_fov, aspect_ratio);
     let noise = noise::Noise::new(terrain_resolution + 1, octaves, frequency, lacunarity);
     let colour_map = colourmap::ColourMap::new_default();
 
-    let mut terrain = terrain::Terrain::new(terrain_size, terrain_size, 1);
-    //let mut terrain = terrain::Terrain::new(terrain_size, terrain_size, terrain_resolution);
-    let mut world = terrain.get_triangles(None, None, 0.0);
-    //let mut world = terrain.get_triangles(Some(noise), Some(colour_map), height_scale);
+    //let mut terrain = terrain::Terrain::new(terrain_size, terrain_size, 1);
+    let mut terrain = terrain::Terrain::new(terrain_size, terrain_size, terrain_resolution);
+    //let mut world = terrain.get_triangles(None, None, 0.0);
+    let mut world = terrain.get_triangles(Some(noise), Some(colour_map), height_scale);
     world.push(Box::new(sphere::Sphere::new(
-        vec3::Vec3::new(0.0, 100.0, 50.0),
+        vec3::Vec3::new(0.0, 150.0, 50.0),
         50.0,
         material::Material::Lambertian(vec3::Vec3::new(0.2, 0.6, 0.9)),
     )));
     world.push(Box::new(sphere::Sphere::new(
-        vec3::Vec3::new(-150.0, 50.0, 0.0),
+        vec3::Vec3::new(-150.0, 100.0, 0.0),
         50.0,
         material::Material::Metal(vec3::Vec3::new(0.8, 0.6, 0.2), 1.0),
     )));
     world.push(Box::new(sphere::Sphere::new(
-        vec3::Vec3::new(150.0, 200.0, 100.0),
+        vec3::Vec3::new(150.0, 250.0, 100.0),
         50.0,
         material::Material::Lambertian(vec3::Vec3::new(0.8, 0.1, 0.6)),
     )));
