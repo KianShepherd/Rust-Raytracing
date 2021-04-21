@@ -1,15 +1,23 @@
 # raytracing
-A rust implimentation of Raytracing in a weekend
-https://raytracing.github.io/books/RayTracingInOneWeekend.html
+A rust implimentation of [_Ray Tracing in One Weekend_](https://raytracing.github.io/books/RayTracingInOneWeekend.html)
 
 ## How to use
-No extra requirements to run, however it is highly recommended to compile in
-release mode to speed up the program if using it for larger renders. Program
+There are no requirements to run this program that are not included in 
+the Cargo.toml, however it is highly recommended to compile in release 
+mode to speed up the program if using it for larger renders. Program
 will output to a file called image.jpg in the current working directory. 
 
+A few scripts have been included to compile in Debug/Release mode as well 
+as clean up the /target directory and generated image. These are made to
+compile and run the program then they will attempt to display it using 
+feh. If feh is not present on your system you can either edit the script
+to open the image in the image viewer of your choice or simply run the 
+program and open the generated image afterwords.
+
 ## The Scene
-The program generates a triangle mesh to raytrace against by using a perlin
-noise function as a height map.
+The program generates a procedural triangle mesh terrain to raytrace against 
+by using a perlin noise function as a height map. It also maps different 
+colours to the triangles based on height. 
 
 ## Working Features
 1. Spheres
