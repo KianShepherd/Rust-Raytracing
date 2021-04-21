@@ -7,7 +7,7 @@ args = ["clean"]
 
 [tasks.clean2]
 command = "rm"
-args = ["-f", "image.ppm"]
+args = ["-f", "image.jpg"]
 
 [tasks.build]
 command = "cargo"
@@ -15,21 +15,11 @@ args = ["build", "--release"]
 dependencies = ["clean"]
 
 [tasks.runer]
-script = ["cargo run > image.ppm"]
+script = ["cargo build --release && ./target/release/raytracing"]
 
 [tasks.view]
 command = "feh"
-args = ["image.ppm"]
-
-[tasks.tests]
-command = "cargo"
-args = ["test"]
-
-[tasks.test]
-dependencies = ["build", "tests"]
+args = ["image.jpg"]
 
 [tasks.run]
 dependencies = ["runer", "view"]
-
-[tasks.all]
-dependencies = ["build", "runer", "view"]

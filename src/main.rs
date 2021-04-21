@@ -3,6 +3,7 @@ mod hittable;
 mod hittables;
 use rand::Rng;
 use crate::hittable::Hittable;
+use image::RgbImage;
 
 mod material;
 mod ray;
@@ -96,6 +97,7 @@ fn main() {
     let image_height = (image_width as f64 / aspect_ratio) as i32;
     let samples_per_pixel = 5;
     let max_depth = 15;
+    let mut image = RgbImage::new(image_width as u32, image_height as u32);
 
     // World
     let terrain_size = 1024.0;
@@ -104,8 +106,8 @@ fn main() {
     let octaves = 2;
     let frequency = 0.15;
     let lacunarity = 0.5;
-    //                                                                                     / 3.0
-    let cam = camera::Camera::new(vec3::Vec3::new(0.0, terrain_size / 1.0, terrain_size * 1.95));
+    //                                                                                     / 3.0                    * 0.95
+    let cam = camera::Camera::new(vec3::Vec3::new(0.0, terrain_size / 2.0, terrain_size * 1.05));
     let noise = noise::Noise::new(terrain_resolution + 1, octaves, frequency, lacunarity);
     let colour_map = colourmap::ColourMap::new_default();
 
@@ -130,7 +132,6 @@ fn main() {
     )));
 
     // Render
-    let mut output = format!("P3\n{} {}\n255\n", image_width, image_height);
     let progress_prints = image_width as f64 / 16.0;
 
     for j in 0..image_height {
@@ -150,9 +151,9 @@ fn main() {
                 };
                 pixel_color = pixel_color + ray_color(r, &world, max_depth);
             }
-            output = format!("{}\n{}", output, pixel_color.to_string(samples_per_pixel));
+            image.put_pixel(i as u32, j as u32, pixel_color.to_rgb(samples_per_pixel));
         }
     }
     eprintln!("100.00% Done\n\n");
-    println!("{}", output);
+    image.save("image.jpg").unwrap();
 }

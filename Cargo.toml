@@ -12,6 +12,7 @@ edition = "2018"
 [dependencies]
 rand = "*"
 noise = "0.7"
+image = "*"
 
 [profile.dev]
 opt-level = 0
