@@ -11,7 +11,7 @@ args = ["-f", "image.ppm"]
 
 [tasks.build]
 command = "cargo"
-args = ["build"]
+args = ["build", "--release"]
 dependencies = ["clean"]
 
 [tasks.runer]
@@ -29,7 +29,7 @@ args = ["test"]
 dependencies = ["build", "tests"]
 
 [tasks.run]
-dependencies = ["build", "runer", "view"]
+dependencies = ["runer", "view"]
 
 [tasks.all]
-dependencies = ["build", "tests", "runer", "view"]
+dependencies = ["build", "runer", "view"]

@@ -2,10 +2,17 @@ mod camera;
 mod hittable;
 mod hittables;
 use rand::Rng;
+use crate::hittable::Hittable;
+
 mod material;
 mod ray;
 mod sphere;
 mod vec3;
+mod triangle;
+mod terrain;
+mod noise;
+mod colourmap;
+
 // run with
 // cargo make run
 fn random() -> f64 {
@@ -57,7 +64,7 @@ fn random_in_hemisphere(normal: vec3::Vec3) -> vec3::Vec3 {
 
 fn ray_color(
     ray: ray::Ray,
-    world: &hittables::Hittables<sphere::Sphere>,
+    world: &hittables::Hittables<dyn Hittable>,
     depth: i32,
 ) -> vec3::Vec3 {
     let mut hit_rec = hittable::HitRecord::new();
@@ -87,37 +94,40 @@ fn main() {
     let aspect_ratio = 16.0 / 9.0;
     let image_width = 400;
     let image_height = (image_width as f64 / aspect_ratio) as i32;
-    let samples_per_pixel = 100;
-    let max_depth = 50;
+    let samples_per_pixel = 5;
+    let max_depth = 15;
 
     // World
-    let world = hittables::Hittables {
-        hittables: vec![
-            sphere::Sphere::new(
-                vec3::Vec3::new(0.0, 0.0, -1.0),
-                0.5,
-                material::Material::Lambertian(vec3::Vec3::new(0.7, 0.3, 0.3)),
-            ),
-            sphere::Sphere::new(
-                vec3::Vec3::new(0.0, -100.5, -1.0),
-                100.0,
-                material::Material::Lambertian(vec3::Vec3::new(0.8, 0.8, 0.0)),
-            ),
-            sphere::Sphere::new(
-                vec3::Vec3::new(-1.0, 0.0, -1.0),
-                0.5,
-                material::Material::Metal(vec3::Vec3::new(0.8, 0.8, 0.8), 0.3),
-            ),
-            sphere::Sphere::new(
-                vec3::Vec3::new(1.0, 0.0, -1.0),
-                0.5,
-                material::Material::Metal(vec3::Vec3::new(0.8, 0.6, 0.2), 1.0),
-            ),
-        ],
-    };
+    let terrain_size = 1024.0;
+    let terrain_resolution = 35;
+    let height_scale = 175.0;
+    let octaves = 2;
+    let frequency = 0.15;
+    let lacunarity = 0.5;
+    //                                                                                     / 3.0
+    let cam = camera::Camera::new(vec3::Vec3::new(0.0, terrain_size / 1.0, terrain_size * 1.95));
+    let noise = noise::Noise::new(terrain_resolution + 1, octaves, frequency, lacunarity);
+    let colour_map = colourmap::ColourMap::new_default();
 
-    // Camera
-    let cam = camera::Camera::new();
+    //let mut terrain = terrain::Terrain::new(terrain_size, terrain_size, 1);
+    let mut terrain = terrain::Terrain::new(terrain_size, terrain_size, terrain_resolution);
+    //let mut world = terrain.get_triangles(None, None, 0.0);
+    let mut world = terrain.get_triangles(Some(noise), Some(colour_map), height_scale);
+    world.push(Box::new(sphere::Sphere::new(
+        vec3::Vec3::new(0.0, 100.0, 50.0),
+        50.0,
+        material::Material::Lambertian(vec3::Vec3::new(0.2, 0.6, 0.9)),
+    )));
+    world.push(Box::new(sphere::Sphere::new(
+        vec3::Vec3::new(-150.0, 50.0, 0.0),
+        50.0,
+        material::Material::Metal(vec3::Vec3::new(0.8, 0.6, 0.2), 1.0),
+    )));
+    world.push(Box::new(sphere::Sphere::new(
+        vec3::Vec3::new(150.0, 200.0, 100.0),
+        50.0,
+        material::Material::Lambertian(vec3::Vec3::new(0.8, 0.1, 0.6)),
+    )));
 
     // Render
     let mut output = format!("P3\n{} {}\n255\n", image_width, image_height);

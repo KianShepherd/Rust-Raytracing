@@ -14,13 +14,13 @@ pub struct Camera {
 }
 
 impl Camera {
-    pub fn new() -> Camera {
+    pub fn new(pos: Vec3) -> Camera {
         let _aspect_ratio = 16.0 / 9.0;
         let _viewport_height = 2.0;
         let _viewport_width = _aspect_ratio * _viewport_height;
         let _focal_length = 1.0;
 
-        let _origin = Vec3::new(0.0, 0.0, 0.0);
+        let _origin = pos;
         let _horizontal = Vec3::new(_viewport_width, 0.0, 0.0);
         let _vertical = Vec3::new(0.0, _viewport_height, 0.0);
         let _lower_left_corner =

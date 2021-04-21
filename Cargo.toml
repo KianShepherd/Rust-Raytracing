@@ -11,3 +11,10 @@ edition = "2018"
 
 [dependencies]
 rand = "*"
+noise = "0.7"
+
+[profile.dev]
+opt-level = 0
+
+[profile.release]
+opt-level = 3

@@ -1,14 +1,18 @@
 use crate::hittable::{HitRecord, Hittable};
 use crate::ray::Ray;
 
-pub struct Hittables<T: Hittable> {
-    pub hittables: Vec<T>,
+pub struct Hittables<T: Hittable + 'static + ?Sized> {
+    pub hittables: Vec<Box<T>>,
 }
 
 impl<T> Hittables<T>
 where
-    T: Hittable + 'static,
+    T: Hittable + 'static + ?Sized,
 {
+    pub fn push(&mut self, hittable_: Box<T>) {
+        &self.hittables.push(hittable_);
+    }
+
     pub fn hit(&self, ray: Ray, t_min: f64, t_max: f64, rec: &mut HitRecord) -> bool {
         let mut hit_anything = false;
         let mut temp_rec = HitRecord::new();
