@@ -1,5 +1,10 @@
 # raytracing
-A rust implimentation of [_Ray Tracing in One Weekend_](https://raytracing.github.io/books/RayTracingInOneWeekend.html)
+A Rust implimentation of [_Ray Tracing in One Weekend_](https://raytracing.github.io/books/RayTracingInOneWeekend.html)
+
+## Dependencies
+* Rand
+* Noise
+* Image
 
 ## How to use
 There are no requirements to run this program that are not included in 
