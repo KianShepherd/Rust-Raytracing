@@ -90,31 +90,32 @@ fn ray_color(
     }
 }
 
+#[allow(unused_variables)]
 fn main() {
     // Image
     let aspect_ratio = 16.0 / 9.0;
     let image_width = 400;
     let image_height = (image_width as f64 / aspect_ratio) as i32;
-    let samples_per_pixel = 5;
-    let max_depth = 15;
+    let samples_per_pixel = 15;
+    let max_depth = 25;
     let mut image = RgbImage::new(image_width as u32, image_height as u32);
 
     // World
     let terrain_size = 1024.0;
-    let terrain_resolution = 35;
+    let terrain_resolution = 1;
     let height_scale = 175.0;
     let octaves = 2;
     let frequency = 0.15;
     let lacunarity = 0.5;
     //                                                                                     / 3.0                    * 0.95
-    let cam = camera::Camera::new(vec3::Vec3::new(0.0, terrain_size / 2.0, terrain_size * 1.05));
+    let cam = camera::Camera::new(vec3::Vec3::new(0.0, terrain_size / 5.0, terrain_size * 0.5));
     let noise = noise::Noise::new(terrain_resolution + 1, octaves, frequency, lacunarity);
     let colour_map = colourmap::ColourMap::new_default();
 
-    //let mut terrain = terrain::Terrain::new(terrain_size, terrain_size, 1);
-    let mut terrain = terrain::Terrain::new(terrain_size, terrain_size, terrain_resolution);
-    //let mut world = terrain.get_triangles(None, None, 0.0);
-    let mut world = terrain.get_triangles(Some(noise), Some(colour_map), height_scale);
+    let mut terrain = terrain::Terrain::new(terrain_size, terrain_size, 1);
+    //let mut terrain = terrain::Terrain::new(terrain_size, terrain_size, terrain_resolution);
+    let mut world = terrain.get_triangles(None, None, 0.0);
+    //let mut world = terrain.get_triangles(Some(noise), Some(colour_map), height_scale);
     world.push(Box::new(sphere::Sphere::new(
         vec3::Vec3::new(0.0, 100.0, 50.0),
         50.0,
