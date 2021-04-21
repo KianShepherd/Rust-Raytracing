@@ -18,5 +18,5 @@ noise function as a height map.
 4. Movable Camera
 5. Triangles
 6. Procedural Terrain
-  * Height Map
-  * Colour Map
+    * Height Map
+    * Colour Map
