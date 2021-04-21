@@ -12,9 +12,7 @@ mod vec3;
 mod triangle;
 mod terrain;
 mod noise;
-mod colourmap;
-
-const LIGHT_LOCATION: vec3::Vec3 = vec3::Vec3 { x: -1500.0, y: 900.0, z: 1200.0};
+mod colour_map;
 
 // run with
 // cargo make run
@@ -22,6 +20,7 @@ fn random() -> f64 {
     let mut rng = rand::thread_rng();
     rng.gen::<f64>()
 }
+
 fn random_f64(min: f64, max: f64) -> f64 {
     min + (max - min) * random()
 }
@@ -82,12 +81,16 @@ fn ray_color(
         let res = material::scatter(ray, hit_rec, color, hit_rec.material.unwrap());
         match res {
             Some(result) => {
-                let light_direction = (LIGHT_LOCATION - hit_rec.p.unwrap()).unit_vector();
-                let point_of_intersection = hit_rec.p.unwrap() + (light_direction * bias);
                 let mut in_shadow = vec3::Vec3::new(1.0, 1.0, 1.0);
-                if world.hit(ray::Ray::new(point_of_intersection, light_direction), 0.001, f64::INFINITY, &mut hittable::HitRecord::new()) {
-                    in_shadow = vec3::Vec3::new(0.2, 0.2, 0.2);
+                for i in 0..world.lights.len() {
+                    let light_direction = (world.lights[i] - hit_rec.p.unwrap()).unit_vector();
+                    let point_of_intersection = hit_rec.p.unwrap() + (light_direction * bias);
+
+                    if world.hit(ray::Ray::new(point_of_intersection, light_direction), 0.001, f64::INFINITY, &mut hittable::HitRecord::new()) {
+                        in_shadow = in_shadow * vec3::Vec3::new(0.3, 0.3, 0.3);
+                    }
                 }
+
                 *color * ray_color(result, world, depth - 1) * in_shadow
             },
             None => vec3::Vec3::new(0.0, 0.0, 0.0),
@@ -124,7 +127,7 @@ fn main() {
     let lacunarity = 0.5;
     let cam = camera::Camera::new(look_from, look_at, v_up, v_fov, aspect_ratio, aperture, focal_distance);
     let noise = noise::Noise::new(terrain_resolution + 1, octaves, frequency, lacunarity);
-    let colour_map = colourmap::ColourMap::new_default();
+    let colour_map = colour_map::ColourMap::new_default();
 
     //let mut terrain = terrain::Terrain::new(terrain_size, terrain_size, 1);
     let mut terrain = terrain::Terrain::new(terrain_size, terrain_size, terrain_resolution);
@@ -145,6 +148,8 @@ fn main() {
         50.0,
         material::Material::Lambertian(vec3::Vec3::new(0.8, 0.1, 0.6)),
     )));
+
+    world.push_light(vec3::Vec3::new(-1500.0, 900.0, 1200.0));
 
     for j in 0..image_height {
         // progress check

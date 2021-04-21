@@ -5,7 +5,7 @@ use crate::hittables::Hittables;
 use crate::triangle::Triangle;
 use crate::material::Material::Lambertian;
 use crate::noise::Noise;
-use crate::colourmap::ColourMap;
+use crate::colour_map::ColourMap;
 
 pub(crate) struct Terrain {
     ground_points: Vec<Vec3>,
@@ -83,6 +83,7 @@ impl Terrain {
 
         Hittables {
             hittables: hittables_,
+            lights: vec![],
         }
     }
 }
