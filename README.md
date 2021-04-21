@@ -43,11 +43,13 @@ by using a perlin noise function as a height map. It also maps different
 colours to the triangles based on height. 
 
 ## Working Features
-1. Spheres
-2. Materials [Lambertian, Metal]
-3. Lighting & Shadows
-4. Movable Camera
-5. Triangles
+1. Materials [Lambertian, Metal]
+2. Lighting & Shadows
+3. Movable Camera
+4. Triangles
+5. Shapes
+    * Spheres
+    * Triangles (with optional back face culling)
 6. Procedural Terrain
     * Height Map
     * Colour Map
