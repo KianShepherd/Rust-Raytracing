@@ -1,5 +1,5 @@
 # Rust-Raytracing
-A Rust implimentation of [_Ray Tracing in One Weekend_](https://raytracing.github.io/books/RayTracingInOneWeekend.html)
+A Rust implementation of [_Ray Tracing in One Weekend_](https://raytracing.github.io/books/RayTracingInOneWeekend.html)
 
 ![Example Render](https://github.com/KianShepherd/Rust-Raytracing/blob/master/example.jpg?raw=true)
 
