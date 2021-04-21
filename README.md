@@ -1,7 +1,13 @@
 # Rust-Raytracing
-A Rust implementation of [_Ray Tracing in One Weekend_](https://raytracing.github.io/books/RayTracingInOneWeekend.html)
+A Rust implementation of [_Ray Tracing in One Weekend_](https://raytracing.github.io/books/RayTracingInOneWeekend.html). 
+Currently implements all functionality of the book excluding Dielectrics which are a WIP. I have also added the code for 
+ray triangle intersection as well as procedural terrain generation with triangle meshes and perlin noise height mapping.
+Simple lighting has also been created by sending a ray back towards the light source.
 
-![Example Render](https://github.com/KianShepherd/Rust-Raytracing/blob/master/example.jpg?raw=true)
+
+![Example Render1](https://github.com/KianShepherd/Rust-Raytracing/blob/master/example1.jpg?raw=true)
+
+![Example Render2](https://github.com/KianShepherd/Rust-Raytracing/blob/master/example2.jpg?raw=true)
 
 ## Dependencies
 * Rand
