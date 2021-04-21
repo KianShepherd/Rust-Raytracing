@@ -110,16 +110,19 @@ fn main() {
     let look_from = vec3::Vec3::new(0.0, 3.5 * height_scale, terrain_size * 0.6);
     let look_at = vec3::Vec3::new(0.0, 0.0, 0.0);
     let v_up = vec3::Vec3::new(0.0, 1.0, 0.0);
-    let image_width = 720;
+    let focal_distance = (look_from - look_at).length();
+    let aperature = 0.01;
+    let image_width = 400;
     let image_height = (image_width as f64 / aspect_ratio) as i32;
-    let samples_per_pixel = 25;
-    let max_depth = 25;
+    let progress_prints = image_width as f64 / 16.0;
+    let samples_per_pixel = 10;
+    let max_depth = 15;
     let mut image = RgbImage::new(image_width as u32, image_height as u32);
-    let terrain_resolution = 50;
+    let terrain_resolution = 30;
     let octaves = 2;
     let frequency = 0.15;
     let lacunarity = 0.5;
-    let cam = camera::Camera::new(look_from, look_at, v_up, v_fov, aspect_ratio);
+    let cam = camera::Camera::new(look_from, look_at, v_up, v_fov, aspect_ratio, aperature, focal_distance);
     let noise = noise::Noise::new(terrain_resolution + 1, octaves, frequency, lacunarity);
     let colour_map = colourmap::ColourMap::new_default();
 
@@ -142,9 +145,6 @@ fn main() {
         50.0,
         material::Material::Lambertian(vec3::Vec3::new(0.8, 0.1, 0.6)),
     )));
-
-    // Render
-    let progress_prints = image_width as f64 / 16.0;
 
     for j in 0..image_height {
         // progress check
