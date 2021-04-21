@@ -80,7 +80,6 @@ fn dielectric_scatter(
     let outward_normal: Vec3;
     let ni_over_nt: f64;
     let mut cosine: f64;
-    let mut refracted: Option<Vec3> = None;
 
     if ray.direction().unit_vector().dot(rec.normal.unwrap()) > 0.0 {
         outward_normal = -rec.normal.unwrap();
@@ -95,9 +94,8 @@ fn dielectric_scatter(
 
     match refract(ray.direction(), outward_normal, ni_over_nt) {
         Some(ray) => {
-            refracted = Some(ray);
             if random_f64(0.0, 1.0) > schlick(cosine, refractive_index) {
-                return Some(Ray::new(rec.p.unwrap().clone(), refracted.unwrap()))
+                return Some(Ray::new(rec.p.unwrap().clone(), ray.clone()))
             }
         },
         None => { },

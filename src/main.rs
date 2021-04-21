@@ -108,7 +108,7 @@ fn ray_color(
 
 #[allow(unused_variables)]
 fn main() {
-    let testing_scene = true;
+    let testing_scene = false;
 
     let terrain_size = 1024.0;
     let height_scale = 175.0;
