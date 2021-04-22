@@ -110,24 +110,24 @@ fn ray_color(
 fn main() {
     let testing_scene = false;
 
-    let terrain_size = 1024.0;
-    let height_scale = 175.0;
+    let terrain_size = 32.0;
+    let height_scale = terrain_size / 6.0;
     let aspect_ratio = 16.0 / 9.0;
     let v_fov = 90.0;
-    let look_from = vec3::Vec3::new(0.0, 3.5 * height_scale, terrain_size * 0.6);
+    let look_from = vec3::Vec3::new(0.0, 3.5 * height_scale, terrain_size * -0.6);
     let look_at = vec3::Vec3::new(0.0, 0.0, 0.0);
     let v_up = vec3::Vec3::new(0.0, 1.0, 0.0);
     let focal_distance = (look_from - look_at).length();
     let aperture = 0.01;
-    let image_width = 300;
+    let image_width = 720;
     let image_height = (image_width as f64 / aspect_ratio) as i32;
     let progress_prints = image_width as f64 / 16.0;
     let samples_per_pixel = 15;
     let max_depth = 25;
     let mut image = RgbImage::new(image_width as u32, image_height as u32);
-    let terrain_resolution = 45;
+    let terrain_resolution = 70;
     let octaves = 2;
-    let frequency = 0.15;
+    let frequency = 0.045;
     let lacunarity = 0.5;
     let camera1 = camera::Camera::new(look_from, look_at, v_up, v_fov, aspect_ratio, aperture, focal_distance);
     let noise = noise::Noise::new(terrain_resolution + 1, octaves, frequency, lacunarity);
@@ -137,6 +137,7 @@ fn main() {
     let mut terrain = terrain::Terrain::new(terrain_size, terrain_size, terrain_resolution);
     //let mut world = terrain.get_triangles(None, None, 0.0);
     let mut world1: Hittables<dyn Hittable> = terrain.get_triangles(Some(noise), Some(colour_map), height_scale);
+    /*
     world1.push(Box::new(sphere::Sphere::new(
         vec3::Vec3::new(0.0, 150.0, 50.0),
         50.0,
@@ -152,7 +153,7 @@ fn main() {
         50.0,
         material::Material::Lambertian(vec3::Vec3::new(0.8, 0.1, 0.6)),
     )));
-
+    */
     world1.push_light(vec3::Vec3::new(-1500.0, 900.0, 1200.0));
 
     let camera2 = camera::Camera::new(vec3::Vec3::new(0.0, 0.0, 0.0), vec3::Vec3::new(0.0, 0.0, -1.0), vec3::Vec3::new(0.0, 1.0, 0.0), 90.0, aspect_ratio, 0.01, 1.0);
