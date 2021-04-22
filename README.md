@@ -9,6 +9,8 @@ Simple lighting has also been created by sending a ray back towards the light so
 
 ![Example Render2](https://github.com/KianShepherd/Rust-Raytracing/blob/master/example2.jpg?raw=true)
 
+![Example Render3](https://github.com/KianShepherd/Rust-Raytracing/blob/master/example3.jpg?raw=true)
+
 ## Dependencies
 * Rand  = "*"
 * Noise = "0.7"
