@@ -10,9 +10,9 @@ Simple lighting has also been created by sending a ray back towards the light so
 ![Example Render2](https://github.com/KianShepherd/Rust-Raytracing/blob/master/example2.jpg?raw=true)
 
 ## Dependencies
-* Rand
-* Noise
-* Image
+* Rand  = "*"
+* Noise = "0.7"
+* Image = "*"
 
 ## How to use
 There are no requirements to run this program that are not included in 
@@ -28,19 +28,14 @@ to open the image in the image viewer of your choice or simply run the
 program and open the generated image afterwords.
 
 ```
-./release.sh
-```
-
-or
-
-```
-cargo run --release
+./release.sh    or    cargo run --release
 ```
 
 ## The Scene
 The program generates a procedural triangle mesh terrain to raytrace against 
 by using a perlin noise function as a height map. It also maps different 
-colours to the triangles based on height. 
+colours to the triangles based on height. It also includes 3 spheres to help
+demonstrate the lightings shadow effect.
 
 ## Working Features
 1. Materials 
