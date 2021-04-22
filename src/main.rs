@@ -5,6 +5,7 @@ use rand::Rng;
 use crate::hittable::Hittable;
 use image::RgbImage;
 use crate::hittables::Hittables;
+use std::time::Instant;
 
 mod material;
 mod ray;
@@ -124,7 +125,7 @@ fn main() {
     let samples_per_pixel = 15;
     let max_depth = 25;
     let mut image = RgbImage::new(image_width as u32, image_height as u32);
-    let terrain_resolution = 30;
+    let terrain_resolution = 45;
     let octaves = 2;
     let frequency = 0.15;
     let lacunarity = 0.5;
@@ -186,6 +187,8 @@ fn main() {
         }
     };
 
+    let now = Instant::now();
+
     for j in 0..image_height {
         // progress check
         if j % ((image_height as f64 / progress_prints) as i32) == 0 {
@@ -214,6 +217,11 @@ fn main() {
             image.put_pixel(i as u32, j as u32, pixel_color.to_rgb(samples_per_pixel));
         }
     }
-    eprintln!("100.00% Done\n\n");
+    let mut seconds = now.elapsed().as_secs();
+    let mut minutes = seconds / 60;
+    seconds = seconds % 60;
+    let hours = minutes / 60;
+    minutes = minutes % 60;
+    eprintln!("100.00% Done\n\nTime taken: {}h : {}m : {}s\n\n", hours, minutes, seconds);
     image.save("image.jpg").unwrap();
 }
