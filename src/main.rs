@@ -6,6 +6,9 @@ use crate::hittable::Hittable;
 use image::RgbImage;
 use crate::hittables::Hittables;
 use std::time::Instant;
+use crate::camera::Camera;
+use crate::rectangle::Rectangle;
+use crate::vec3::Vec3;
 
 mod material;
 mod ray;
@@ -15,6 +18,7 @@ mod triangle;
 mod terrain;
 mod noise;
 mod colour_map;
+mod rectangle;
 
 // run with
 // cargo make run
@@ -22,11 +26,9 @@ fn random() -> f64 {
     let mut rng = rand::thread_rng();
     rng.gen::<f64>()
 }
-
 fn random_f64(min: f64, max: f64) -> f64 {
     min + (max - min) * random()
 }
-
 #[allow(dead_code)]
 fn random_vec3(min: f64, max: f64) -> vec3::Vec3 {
     vec3::Vec3::new(
@@ -64,6 +66,98 @@ fn random_in_hemisphere(normal: vec3::Vec3) -> vec3::Vec3 {
     } else {
         -in_unit_sphere
     }
+}
+
+fn create_world(aspect_ratio: f64) ->  (Hittables<dyn Hittable>, Camera) {
+    let v_fov = 90.0;
+    let look_from = vec3::Vec3::new(0.0, 0.0, -2.5);
+    let look_at = vec3::Vec3::new(0.0, 0.0, 0.0);
+    let v_up = vec3::Vec3::new(0.0, 1.0, 0.0);
+    let focal_distance = (look_from - look_at).length();
+    let aperture = 0.01;
+
+    let camera = camera::Camera::new(look_from, look_at, v_up, v_fov, aspect_ratio, aperture, focal_distance);
+
+    let mut world_objects: Vec<Box<dyn Hittable>> = vec![];
+    world_objects.push(Box::new(
+        rectangle::Rectangle::new(
+            Vec3::new(-2.0, -2.0, 0.0),
+            Vec3::new(2.0, -2.0, 0.0),
+            Vec3::new(-2.0, 2.0, 0.0),
+            Vec3::new(2.0, 2.0, 0.0),
+            material::Material::Lambertian(Vec3::new(0.0, 0.6, 0.0)),
+            false
+        )));
+    world_objects.push(Box::new(
+        rectangle::Rectangle::new(
+            Vec3::new(-2.0, -2.0, 0.0),
+            Vec3::new(-2.0, -2.0, -2.0),
+            Vec3::new(-2.0, 2.0, 0.0),
+            Vec3::new(-2.0, 2.0, -2.0),
+            material::Material::Lambertian(Vec3::new(0.6, 0.0, 0.0)),
+            false
+        )));
+    world_objects.push(Box::new(
+        rectangle::Rectangle::new(
+            Vec3::new(2.0, -2.0, 0.0),
+            Vec3::new(2.0, -2.0, -2.0),
+            Vec3::new(2.0, 2.0, 0.0),
+            Vec3::new(2.0, 2.0, -2.0),
+            material::Material::Lambertian(Vec3::new(0.9, 0.9, 0.9)),
+            false
+        )));
+    world_objects.push(Box::new(
+        rectangle::Rectangle::new(
+            Vec3::new(-2.0, 2.0, 2.0),
+            Vec3::new(2.0, 2.0, 2.0),
+            Vec3::new(-2.0, 2.0, -2.0),
+            Vec3::new(2.0, 2.0, -2.0),
+            material::Material::Lambertian(Vec3::new(0.0, 0.0, 0.9)),
+            false
+        )));
+    world_objects.push(Box::new(
+        rectangle::Rectangle::new(
+            Vec3::new(-2.0, -2.0, 2.0),
+            Vec3::new(2.0, -2.0, 2.0),
+            Vec3::new(-2.0, -2.0, -2.0),
+            Vec3::new(2.0, -2.0, -2.0),
+            material::Material::Lambertian(Vec3::new(0.9, 0.9, 0.0)),
+            false
+        )));
+
+    let world = Hittables {
+        lights: vec![],
+        hittables: world_objects,
+    };
+
+    (world, camera)
+}
+
+fn create_procedural_world(aspect_ratio: f64) ->  (Hittables<dyn Hittable>, Camera) {
+    let terrain_size = 32.0;
+    let terrain_resolution = 70;
+    let height_scale = terrain_size / 6.0;
+    let v_fov = 90.0;
+    let look_from = vec3::Vec3::new(0.0, 3.5 * height_scale, terrain_size * 0.6);
+    let look_at = vec3::Vec3::new(0.0, 0.0, 0.0);
+    let v_up = vec3::Vec3::new(0.0, 1.0, 0.0);
+    let focal_distance = (look_from - look_at).length();
+    let aperture = 0.01;
+    let octaves = 2;
+    let frequency = 0.045;
+    let lacunarity = 0.5;
+
+    let camera = camera::Camera::new(look_from, look_at, v_up, v_fov, aspect_ratio, aperture, focal_distance);
+    let noise = noise::Noise::new(terrain_resolution + 1, octaves, frequency, lacunarity);
+    let colour_map = colour_map::ColourMap::new_default();
+
+    let mut terrain = terrain::Terrain::new(terrain_size, terrain_size, terrain_resolution);
+    let mut world: Hittables<dyn Hittable> = terrain.get_triangles(Some(noise), Some(colour_map), height_scale);
+    let light = vec3::Vec3::new(-1500.0, 900.0, 1200.0);
+
+    world.push_light(light);
+
+    (world, camera)
 }
 
 fn ray_color(
@@ -108,88 +202,18 @@ fn ray_color(
 
 #[allow(unused_variables)]
 fn main() {
-    let testing_scene = false;
-
-    let terrain_size = 32.0;
-    let height_scale = terrain_size / 6.0;
+    let testing_scene = true;
     let aspect_ratio = 16.0 / 9.0;
-    let v_fov = 90.0;
-    let look_from = vec3::Vec3::new(0.0, 3.5 * height_scale, terrain_size * -0.6);
-    let look_at = vec3::Vec3::new(0.0, 0.0, 0.0);
-    let v_up = vec3::Vec3::new(0.0, 1.0, 0.0);
-    let focal_distance = (look_from - look_at).length();
-    let aperture = 0.01;
-    let image_width = 720;
+    let image_width = 300;
     let image_height = (image_width as f64 / aspect_ratio) as i32;
-    let progress_prints = image_width as f64 / 16.0;
-    let samples_per_pixel = 15;
-    let max_depth = 25;
     let mut image = RgbImage::new(image_width as u32, image_height as u32);
-    let terrain_resolution = 70;
-    let octaves = 2;
-    let frequency = 0.045;
-    let lacunarity = 0.5;
-    let camera1 = camera::Camera::new(look_from, look_at, v_up, v_fov, aspect_ratio, aperture, focal_distance);
-    let noise = noise::Noise::new(terrain_resolution + 1, octaves, frequency, lacunarity);
-    let colour_map = colour_map::ColourMap::new_default();
+    let samples_per_pixel = 40;
+    let max_depth = 50;
 
-    //let mut terrain = terrain::Terrain::new(terrain_size, terrain_size, 1);
-    let mut terrain = terrain::Terrain::new(terrain_size, terrain_size, terrain_resolution);
-    //let mut world = terrain.get_triangles(None, None, 0.0);
-    let mut world1: Hittables<dyn Hittable> = terrain.get_triangles(Some(noise), Some(colour_map), height_scale);
-    /*
-    world1.push(Box::new(sphere::Sphere::new(
-        vec3::Vec3::new(0.0, 150.0, 50.0),
-        50.0,
-        material::Material::Lambertian(vec3::Vec3::new(0.2, 0.6, 0.9)),
-    )));
-    world1.push(Box::new(sphere::Sphere::new(
-        vec3::Vec3::new(-150.0, 100.0, 0.0),
-        50.0,
-        material::Material::Metal(vec3::Vec3::new(0.8, 0.6, 0.2), 1.0),
-    )));
-    world1.push(Box::new(sphere::Sphere::new(
-        vec3::Vec3::new(150.0, 250.0, 100.0),
-        50.0,
-        material::Material::Lambertian(vec3::Vec3::new(0.8, 0.1, 0.6)),
-    )));
-    */
-    world1.push_light(vec3::Vec3::new(-1500.0, 900.0, 1200.0));
-
-    let camera2 = camera::Camera::new(vec3::Vec3::new(0.0, 0.0, 0.0), vec3::Vec3::new(0.0, 0.0, -1.0), vec3::Vec3::new(0.0, 1.0, 0.0), 90.0, aspect_ratio, 0.01, 1.0);
-    let world2: Hittables<dyn Hittable> = {
-        let world_objects: Vec<Box<dyn Hittable>> = {
-            let mut objects: Vec<Box<dyn Hittable>> = vec![];
-            objects.push(Box::new(
-                sphere::Sphere::new(
-                    vec3::Vec3::new(0.0, -100.5, -1.0),
-                    100.0,
-                    material::Material::Lambertian(vec3::Vec3::new(0.8, 0.8, 0.0)))));
-            objects.push(Box::new(
-                sphere::Sphere::new(
-                    vec3::Vec3::new(0.0, 0.0, -1.0),
-                    0.5,
-                    material::Material::Lambertian(vec3::Vec3::new(0.1, 0.2, 0.5)))));
-            objects.push(Box::new(
-                sphere::Sphere::new(
-                    vec3::Vec3::new(1.0, 0.0, -1.0),
-                    0.5,
-                    material::Material::Metal(vec3::Vec3::new(0.8, 0.6, 0.2), 0.1))));
-            objects.push(Box::new(
-                sphere::Sphere::new(
-                    vec3::Vec3::new(-1.0, 0.0, -1.0),
-                    0.5,
-                    material::Material::Dielectric(1.5))));
-            objects
-        };
-        Hittables {
-            lights: vec![],
-            hittables: world_objects,
-        }
-    };
+    let (world, camera) =  if testing_scene { create_world(aspect_ratio) } else { create_procedural_world(aspect_ratio) };
 
     let now = Instant::now();
-
+    let progress_prints = image_width as f64 / 16.0;
     for j in 0..image_height {
         // progress check
         if j % ((image_height as f64 / progress_prints) as i32) == 0 {
@@ -203,17 +227,10 @@ fn main() {
                     let u = ((i as f64) + random()) / (image_width - 1) as f64;
                     let v =
                         ((image_height - (j + 1)) as f64 + random()) / (image_height - 1) as f64;
-                    if testing_scene {
-                        camera2.get_ray(u, v)
-                    } else {
-                        camera1.get_ray(u, v)
-                    }
+                        camera.get_ray(u, v)
                 };
-                if testing_scene {
-                    pixel_color = pixel_color + ray_color(r, &world2, max_depth);
-                } else {
-                    pixel_color = pixel_color + ray_color(r, &world1, max_depth);
-                }
+                pixel_color = pixel_color + ray_color(r, &world, max_depth);
+
             }
             image.put_pixel(i as u32, j as u32, pixel_color.to_rgb(samples_per_pixel));
         }
