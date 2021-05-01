@@ -35,18 +35,12 @@ program and open the generated image afterwords.
 ./release.sh    or    cargo run --release
 ```
 
-## The Scene
-The program generates a procedural triangle mesh terrain to raytrace against 
-by using a perlin noise function as a height map. It also maps different 
-colours to the triangles based on height. It also includes 3 spheres to help
-demonstrate the lightings shadow effect.
-
 ## Working Features
 1. Materials 
     * Lambertian
     * Metal
     * Dielectric (IN PROGRESS)
-    * Mirror (TODO)
+    * Mirror
 2. Lighting
     * Multiple Point Lights
     * Shadows
