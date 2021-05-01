@@ -24,17 +24,17 @@ impl Cube {
 
         let mut squares_ = vec![];
         //Front
-        squares_.push(Rectangle::new( bottom_front_left, bottom_front_right, top_front_left,top_front_right, mat, false));
+        squares_.push(Rectangle::new( bottom_front_left, bottom_front_right, top_front_left,top_front_right, mat, true));
         //Back
-        squares_.push(Rectangle::new( bottom_back_left, bottom_back_right, top_back_left,top_back_right, mat, false));
+        squares_.push(Rectangle::new( bottom_back_left, bottom_back_right, top_back_left,top_back_right, mat, true));
         //Top
-        squares_.push(Rectangle::new(top_front_left, top_front_right, top_back_left, top_back_right, mat, false));
+        squares_.push(Rectangle::new(top_front_left, top_front_right, top_back_right , top_back_left, mat, false));
         //Bottom
-        squares_.push(Rectangle::new(bottom_front_left, bottom_front_right, bottom_back_left, bottom_back_right, mat, false));
+        squares_.push(Rectangle::new(bottom_front_left, bottom_front_right, bottom_back_left, bottom_back_right, mat, true));
         //Left
-        squares_.push(Rectangle::new(bottom_back_left, bottom_front_left, top_back_left, top_front_left, mat, false));
+        squares_.push(Rectangle::new(bottom_back_left, bottom_front_left, top_back_left, top_front_left, mat, true));
         //Right
-        squares_.push(Rectangle::new(top_back_right, bottom_back_right, top_front_right, bottom_front_right, mat, false));
+        squares_.push(Rectangle::new(bottom_front_right, top_front_right, top_back_right, bottom_back_right  , mat, true));
 
         Cube {
             top_right: top_back_right,

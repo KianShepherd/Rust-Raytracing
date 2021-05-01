@@ -8,6 +8,7 @@ pub enum Material {
     Lambertian(Vec3),
     Metal(Vec3, f64),
     Dielectric(f64),
+    Mirror,
 }
 
 pub fn scatter(ray: Ray, rec: HitRecord, color: &mut Vec3, material: Material) -> Option<Ray> {
@@ -15,6 +16,7 @@ pub fn scatter(ray: Ray, rec: HitRecord, color: &mut Vec3, material: Material) -
         Material::Lambertian(col) => lambertian_scatter(ray, rec, color, col),
         Material::Metal(col, fuzz) => metal_scatter(ray, rec, color, col, fuzz),
         Material::Dielectric(refractive_index) => dielectric_scatter(ray, rec, color, refractive_index),
+        Material::Mirror => mirror_scatter(ray, rec, color),
     }
 }
 
@@ -64,6 +66,20 @@ fn metal_scatter(
     color.clone_from(&material_color);
     if scattered.direction().dot(rec.normal.unwrap()) > 0.0 {
         Some(scattered)
+    } else {
+        None
+    }
+}
+
+fn mirror_scatter(
+    ray: Ray,
+    rec: HitRecord,
+    color: &mut Vec3,
+) -> Option<Ray> {
+    let reflected = Ray::new(rec.p.unwrap(), reflect(ray.direction().unit_vector(), rec.normal.unwrap()));
+    color.clone_from(&Vec3::new(1.0, 1.0, 1.0));
+    if reflected.direction().dot(rec.normal.unwrap()) > 0.0 {
+        Some(reflected)
     } else {
         None
     }

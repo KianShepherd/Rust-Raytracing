@@ -5,10 +5,10 @@ use crate::hittables::Hittables;
 use std::time::Instant;
 use crate::camera::Camera;
 use crate::vec3::Vec3;
-use crate::axis_aligned_cube::Cube;
 use std::sync::{Mutex, Arc};
 use num_cpus;
 use std::thread;
+use crate::sphere::Sphere;
 
 mod camera;
 mod hittable;
@@ -80,7 +80,7 @@ fn create_world(aspect_ratio: f64) ->  (Hittables, Camera) {
 
     let camera = camera::Camera::new(look_from, look_at, v_up, v_fov, aspect_ratio, aperture, focal_distance);
     let mut light_objects = vec![];
-    light_objects.push(Box::new(Vec3::new(0.0, -1.0, -1.8)));
+    light_objects.push(Box::new(Vec3::new(-1.0, -1.5, -3.5)));
 
     let mut world_objects: Vec<Box<dyn Hittable + Send + Sync + 'static>> = vec![];
     world_objects.push(Box::new(
@@ -129,6 +129,7 @@ fn create_world(aspect_ratio: f64) ->  (Hittables, Camera) {
             false
         )));
 
+    /*
     world_objects.push(Box::new(Cube::new(Vec3::new(-1.5,-2.0, -1.0),
                                           Vec3::new(-0.5, 1.0, -0.5),
                                           material::Material::Lambertian(Vec3::new(0.6, 0.6, 0.6))
@@ -137,7 +138,20 @@ fn create_world(aspect_ratio: f64) ->  (Hittables, Camera) {
                                           Vec3::new(0.2, 0.0, -1.0),
                                           material::Material::Lambertian(Vec3::new(0.6, 0.6, 0.6))
     )));
+    */
+    world_objects.push(Box::new(Sphere::new(
+        Vec3::new(-0.3, -1.0, -1.0),
+        0.5,
+        material::Material::Lambertian(Vec3::new(0.7, 0.1, 0.8)))));
 
+    world_objects.push(Box::new(Sphere::new(
+        Vec3::new(0.6, 0.0, -1.5),
+        0.5,
+        material::Material::Metal(Vec3::new(0.7, 0.6, 0.2), 1.0))));
+    world_objects.push(Box::new(Sphere::new(
+        Vec3::new(-0.9, 1.0, -1.2),
+        0.5,
+        material::Material::Mirror)));
 
 
     let world = Hittables {
@@ -265,10 +279,10 @@ fn main() {
     let using_multithreading = true;
 
     let aspect_ratio = 16.0 / 9.0;
-    let image_width = 400;
+    let image_width = 1080;
     let image_height = (image_width as f64 / aspect_ratio) as i32;
-    let samples_per_pixel = 30;
-    let max_depth = 40;
+    let samples_per_pixel = 50;
+    let max_depth = 50;
 
     let (world, camera) =  if testing_scene { create_world(aspect_ratio) } else { create_procedural_world(aspect_ratio) };
 
