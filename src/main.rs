@@ -164,7 +164,7 @@ fn create_world(aspect_ratio: f64) ->  (Hittables, Camera) {
 
 fn create_procedural_world(aspect_ratio: f64) ->  (Hittables, Camera) {
     let terrain_size = 32.0;
-    let terrain_resolution = 70;
+    let terrain_resolution = 100;
     let height_scale = terrain_size / 6.0;
     let v_fov = 90.0;
     let look_from = vec3::Vec3::new(0.0, 3.5 * height_scale, terrain_size * 0.6);
@@ -173,11 +173,12 @@ fn create_procedural_world(aspect_ratio: f64) ->  (Hittables, Camera) {
     let focal_distance = (look_from - look_at).length();
     let aperture = 0.01;
     let octaves = 2;
-    let frequency = 0.045;
+    let frequency = 0.025;
     let lacunarity = 0.5;
+    let seed = 121;
 
     let camera = camera::Camera::new(look_from, look_at, v_up, v_fov, aspect_ratio, aperture, focal_distance);
-    let noise = noise::Noise::new(terrain_resolution + 1, octaves, frequency, lacunarity);
+    let noise = noise::Noise::new(terrain_resolution + 1, octaves, frequency, lacunarity, seed);
     let colour_map = colour_map::ColourMap::new_default();
 
     let mut terrain = terrain::Terrain::new(terrain_size, terrain_size, terrain_resolution);
@@ -275,13 +276,13 @@ fn sample_pixel(samples_per_pixel: usize, x: f64, y: i32, image_width: i32, imag
 
 #[allow(unused_variables)]
 fn main() {
-    let testing_scene = true;
+    let testing_scene = false;
     let using_multithreading = true;
 
     let aspect_ratio = 16.0 / 9.0;
     let image_width = 1080;
     let image_height = (image_width as f64 / aspect_ratio) as i32;
-    let samples_per_pixel = 50;
+    let samples_per_pixel = 75;
     let max_depth = 50;
 
     let (world, camera) =  if testing_scene { create_world(aspect_ratio) } else { create_procedural_world(aspect_ratio) };

@@ -1,4 +1,4 @@
-use noise::{Fbm, NoiseFn, MultiFractal};
+use noise::{Fbm, NoiseFn, MultiFractal, Seedable};
 use noise::utils::{PlaneMapBuilder, NoiseMapBuilder};
 
 pub struct Noise {
@@ -6,9 +6,10 @@ pub struct Noise {
 }
 
 impl Noise {
-    pub fn new(resolution: usize, octaves: usize, frequency: f64, lacunarity: f64) -> Noise {
+    pub fn new(resolution: usize, octaves: usize, frequency: f64, lacunarity: f64, seed_value: u32) -> Noise {
         let mut noise_map = vec![];
         let fbm = Fbm::new()
+            .set_seed(seed_value)
             .set_octaves(octaves)
             .set_frequency(frequency)
             .set_lacunarity(lacunarity);
