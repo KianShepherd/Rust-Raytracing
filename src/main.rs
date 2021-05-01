@@ -243,14 +243,30 @@ fn create_work_list(image_width: i32, image_height: i32, num_cpu: usize) -> Vec<
     work_list
 }
 
+fn sample_pixel(samples_per_pixel: usize, x: f64, y: i32, image_width: i32, image_height: i32, max_depth: i32, camera: &Camera, world: &Hittables) -> Vec3 {
+    let mut pixel_color = vec3::Vec3::new(0.0, 0.0, 0.0);
+
+    for _k in 0..samples_per_pixel {
+        let r = {
+            let u = (x + random()) / (image_width - 1) as f64;
+            let v =
+                ((image_height - (y + 1)) as f64 + random()) / (image_height - 1) as f64;
+            camera.get_ray(u, v)
+        };
+        pixel_color = pixel_color + ray_color(r, world, max_depth);
+    }
+
+    pixel_color
+}
+
 #[allow(unused_variables)]
 fn main() {
     let testing_scene = true;
     let using_multithreading = true;
+
     let aspect_ratio = 16.0 / 9.0;
     let image_width = 400;
     let image_height = (image_width as f64 / aspect_ratio) as i32;
-
     let samples_per_pixel = 30;
     let max_depth = 40;
 
@@ -277,18 +293,7 @@ fn main() {
                 let mut inner_work_vec = vec![];
 
                 for work in work_list_for_cpu {
-                    let mut pixel_color = vec3::Vec3::new(0.0, 0.0, 0.0);
-
-                    for _k in 0..samples_per_pixel {
-                        let r = {
-                            let u = ((work.x as f64) + random()) / (image_width - 1) as f64;
-                            let v =
-                                ((image_height - (work.y as i32 + 1)) as f64 + random()) / (image_height - 1) as f64;
-                            scoped_camera.get_ray(u, v)
-                        };
-                        pixel_color = pixel_color + ray_color(r, &scoped_world, max_depth);
-
-                    }
+                    let pixel_color = sample_pixel(samples_per_pixel, work.x as f64, work.y as i32, image_width, image_height, max_depth, &scoped_camera, &scoped_world);
 
                     inner_work_vec.push(Work {
                         x: work.x,
@@ -316,7 +321,7 @@ fn main() {
             Err(_) => {ImageBuffer::new(image_width as u32, image_height as u32)},
         };
         final_val
-    } else {
+    } else { // Single Thread
         let mut image_ = RgbImage::new(image_width as u32, image_height as u32);
         let progress_prints = image_width as f64 / 16.0;
         for j in 0..image_height {
@@ -326,17 +331,7 @@ fn main() {
             }
 
             for i in 0..image_width {
-                let mut pixel_color = vec3::Vec3::new(0.0, 0.0, 0.0);
-                for _k in 0..samples_per_pixel {
-                    let r = {
-                        let u = ((i as f64) + random()) / (image_width - 1) as f64;
-                        let v =
-                            ((image_height - (j + 1)) as f64 + random()) / (image_height - 1) as f64;
-                        camera.get_ray(u, v)
-                    };
-                    pixel_color = pixel_color + ray_color(r, &world, max_depth);
-
-                }
+                let pixel_color = sample_pixel(samples_per_pixel, i as f64, j as i32, image_width, image_height, max_depth, &camera, &world);
                 image_.put_pixel(i as u32, j as u32, pixel_color.to_rgb(samples_per_pixel));
             }
         }
