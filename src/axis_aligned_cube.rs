@@ -1,10 +1,10 @@
 use crate::rectangle::Rectangle;
 use crate::material::Material;
 use crate::vec3::Vec3;
-use std::convert::TryFrom;
 use crate::hittable;
 use crate::ray::Ray;
 
+#[allow(dead_code)]
 pub struct Cube {
     top_right: Vec3,
     bottom_left: Vec3,

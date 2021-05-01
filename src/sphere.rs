@@ -9,6 +9,8 @@ pub struct Sphere {
     radius: f64,
     material: material::Material,
 }
+
+#[allow(dead_code)]
 impl Sphere {
     pub fn new(cen: Vec3, rad: f64, mat: material::Material) -> Sphere {
         Sphere {

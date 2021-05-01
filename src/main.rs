@@ -1,16 +1,18 @@
-mod camera;
-mod hittable;
-mod hittables;
 use rand::Rng;
 use crate::hittable::Hittable;
-use image::RgbImage;
+use image::{RgbImage, Rgb, ImageBuffer};
 use crate::hittables::Hittables;
 use std::time::Instant;
 use crate::camera::Camera;
-use crate::rectangle::Rectangle;
 use crate::vec3::Vec3;
 use crate::axis_aligned_cube::Cube;
+use std::sync::{Mutex, Arc};
+use num_cpus;
+use std::thread;
 
+mod camera;
+mod hittable;
+mod hittables;
 mod material;
 mod ray;
 mod sphere;
@@ -22,8 +24,6 @@ mod colour_map;
 mod rectangle;
 mod axis_aligned_cube;
 
-// run with
-// cargo make run
 fn random() -> f64 {
     let mut rng = rand::thread_rng();
     rng.gen::<f64>()
@@ -70,7 +70,7 @@ fn random_in_hemisphere(normal: vec3::Vec3) -> vec3::Vec3 {
     }
 }
 
-fn create_world(aspect_ratio: f64) ->  (Hittables<dyn Hittable>, Camera) {
+fn create_world(aspect_ratio: f64) ->  (Hittables, Camera) {
     let v_fov = 90.0;
     let look_from = vec3::Vec3::new(0.0, 0.0, -3.5);
     let look_at = vec3::Vec3::new(0.0, 0.0, 0.0);
@@ -80,9 +80,9 @@ fn create_world(aspect_ratio: f64) ->  (Hittables<dyn Hittable>, Camera) {
 
     let camera = camera::Camera::new(look_from, look_at, v_up, v_fov, aspect_ratio, aperture, focal_distance);
     let mut light_objects = vec![];
-    light_objects.push(Vec3::new(0.0, -1.0, -1.8));
+    light_objects.push(Box::new(Vec3::new(0.0, -1.0, -1.8)));
 
-    let mut world_objects: Vec<Box<dyn Hittable>> = vec![];
+    let mut world_objects: Vec<Box<dyn Hittable + Send + Sync + 'static>> = vec![];
     world_objects.push(Box::new(
         rectangle::Rectangle::new(
             Vec3::new(-2.0, -2.0, 0.0),
@@ -148,7 +148,7 @@ fn create_world(aspect_ratio: f64) ->  (Hittables<dyn Hittable>, Camera) {
     (world, camera)
 }
 
-fn create_procedural_world(aspect_ratio: f64) ->  (Hittables<dyn Hittable>, Camera) {
+fn create_procedural_world(aspect_ratio: f64) ->  (Hittables, Camera) {
     let terrain_size = 32.0;
     let terrain_resolution = 70;
     let height_scale = terrain_size / 6.0;
@@ -167,7 +167,7 @@ fn create_procedural_world(aspect_ratio: f64) ->  (Hittables<dyn Hittable>, Came
     let colour_map = colour_map::ColourMap::new_default();
 
     let mut terrain = terrain::Terrain::new(terrain_size, terrain_size, terrain_resolution);
-    let mut world: Hittables<dyn Hittable> = terrain.get_triangles(Some(noise), Some(colour_map), height_scale);
+    let mut world: Hittables = terrain.get_triangles(Some(noise), Some(colour_map), height_scale);
     let light = vec3::Vec3::new(-1500.0, 900.0, 1200.0);
 
     world.push_light(light);
@@ -177,7 +177,7 @@ fn create_procedural_world(aspect_ratio: f64) ->  (Hittables<dyn Hittable>, Came
 
 fn ray_color(
     ray: ray::Ray,
-    world: &hittables::Hittables<dyn Hittable>,
+    world: &hittables::Hittables,
     depth: i32,
 ) -> vec3::Vec3 {
     let mut hit_rec = hittable::HitRecord::new();
@@ -194,9 +194,9 @@ fn ray_color(
             Some(result) => {
                 let mut in_shadow = vec3::Vec3::new(1.0, 1.0, 1.0);
                 for i in 0..world.lights.len() {
-                    let light_direction = (world.lights[i] - hit_rec.p.unwrap()).unit_vector();
+                    let light_direction = (*world.lights[i] - hit_rec.p.unwrap()).unit_vector();
                     let point_of_intersection = hit_rec.p.unwrap() + (light_direction * bias);
-                    let max_dist = (point_of_intersection - world.lights[i]).length();
+                    let max_dist = (point_of_intersection - *world.lights[i]).length();
                     if world.hit(ray::Ray::new(point_of_intersection, light_direction), 0.01, max_dist / 2.0, &mut hittable::HitRecord::new()) {
                         in_shadow = in_shadow * vec3::Vec3::new(0.3, 0.3, 0.3);
                     }
@@ -215,41 +215,134 @@ fn ray_color(
     }
 }
 
+#[derive(Debug, Copy, Clone)]
+struct Work {
+    x: usize,
+    y: usize,
+    colour: Option<Rgb<u8>>,
+}
+
+fn create_work_list(image_width: i32, image_height: i32, num_cpu: usize) -> Vec<Vec<Work>>{
+    let mut work_list = vec![];
+    let rows = ((image_height / num_cpu as i32) + 1) as usize;
+    for i in 0..num_cpu {
+        let mut work_for_cpu = vec![];
+        for y in (i * rows)..((i + 1) * rows) {
+            for x in 0..image_width {
+                if y < image_height as usize && x < image_width {
+                    work_for_cpu.push(Work {
+                        x: x as usize,
+                        y: y as usize,
+                        colour: None,
+                    });
+                }
+            }
+        }
+        work_list.push(work_for_cpu);
+    }
+    work_list
+}
+
 #[allow(unused_variables)]
 fn main() {
     let testing_scene = true;
+    let using_multithreading = true;
     let aspect_ratio = 16.0 / 9.0;
     let image_width = 400;
     let image_height = (image_width as f64 / aspect_ratio) as i32;
-    let mut image = RgbImage::new(image_width as u32, image_height as u32);
+
     let samples_per_pixel = 30;
-    let max_depth = 50;
+    let max_depth = 40;
 
     let (world, camera) =  if testing_scene { create_world(aspect_ratio) } else { create_procedural_world(aspect_ratio) };
 
     let now = Instant::now();
-    let progress_prints = image_width as f64 / 16.0;
-    for j in 0..image_height {
-        // progress check
-        if j % ((image_height as f64 / progress_prints) as i32) == 0 {
-            eprintln!("{:.2}% Done", (j as f64 / image_height as f64) * 100.0);
+    let image = if using_multithreading {
+        let image_ = Arc::new(Mutex::new(ImageBuffer::new(image_width as u32, image_height as u32)));
+        let world_ = Arc::new(world);
+        let camera_ = Arc::new(camera);
+
+        let cpu_count = num_cpus::get();
+        let mut task_list = vec![];
+        let work_list = Arc::new(create_work_list(image_width, image_height, cpu_count));
+
+        for cpu in 0..cpu_count {
+            let scoped_image = image_.clone();
+            let scoped_world = world_.clone();
+            let scoped_camera = camera_.clone();
+            let scoped_work_list = work_list.clone();
+
+            task_list.push(thread::spawn(move || {
+                let work_list_for_cpu = scoped_work_list.get(cpu).unwrap();
+                let mut inner_work_vec = vec![];
+
+                for work in work_list_for_cpu {
+                    let mut pixel_color = vec3::Vec3::new(0.0, 0.0, 0.0);
+
+                    for _k in 0..samples_per_pixel {
+                        let r = {
+                            let u = ((work.x as f64) + random()) / (image_width - 1) as f64;
+                            let v =
+                                ((image_height - (work.y as i32 + 1)) as f64 + random()) / (image_height - 1) as f64;
+                            scoped_camera.get_ray(u, v)
+                        };
+                        pixel_color = pixel_color + ray_color(r, &scoped_world, max_depth);
+
+                    }
+
+                    inner_work_vec.push(Work {
+                        x: work.x,
+                        y: work.y,
+                        colour: Some(pixel_color.to_rgb(samples_per_pixel)),
+                    });
+                }
+
+                let mut image_data = scoped_image.lock().unwrap();
+                for final_work in inner_work_vec {
+                    image_data.put_pixel(final_work.x as u32, final_work.y as u32, final_work.colour.unwrap());
+                    //println!("{}:{}:{:#?}\n", final_work.x, final_work.y, final_work.colour.unwrap())
+                }
+
+                println!("Cpu {} done out of {}.", cpu + 1, cpu_count);
+            }));
         }
 
-        for i in 0..image_width {
-            let mut pixel_color = vec3::Vec3::new(0.0, 0.0, 0.0);
-            for _k in 0..samples_per_pixel {
-                let r = {
-                    let u = ((i as f64) + random()) / (image_width - 1) as f64;
-                    let v =
-                        ((image_height - (j + 1)) as f64 + random()) / (image_height - 1) as f64;
-                        camera.get_ray(u, v)
-                };
-                pixel_color = pixel_color + ray_color(r, &world, max_depth);
+        for task in task_list {
+            let _ = task.join();
+        }
 
+        let final_val = match image_.lock() {
+            Ok(x) => x.clone(),
+            Err(_) => {ImageBuffer::new(image_width as u32, image_height as u32)},
+        };
+        final_val
+    } else {
+        let mut image_ = RgbImage::new(image_width as u32, image_height as u32);
+        let progress_prints = image_width as f64 / 16.0;
+        for j in 0..image_height {
+            // progress check
+            if j % ((image_height as f64 / progress_prints) as i32) == 0 {
+                eprintln!("{:.2}% Done", (j as f64 / image_height as f64) * 100.0);
             }
-            image.put_pixel(i as u32, j as u32, pixel_color.to_rgb(samples_per_pixel));
+
+            for i in 0..image_width {
+                let mut pixel_color = vec3::Vec3::new(0.0, 0.0, 0.0);
+                for _k in 0..samples_per_pixel {
+                    let r = {
+                        let u = ((i as f64) + random()) / (image_width - 1) as f64;
+                        let v =
+                            ((image_height - (j + 1)) as f64 + random()) / (image_height - 1) as f64;
+                        camera.get_ray(u, v)
+                    };
+                    pixel_color = pixel_color + ray_color(r, &world, max_depth);
+
+                }
+                image_.put_pixel(i as u32, j as u32, pixel_color.to_rgb(samples_per_pixel));
+            }
         }
-    }
+        image_
+    };
+
     let mut seconds = now.elapsed().as_secs();
     let mut minutes = seconds / 60;
     seconds = seconds % 60;

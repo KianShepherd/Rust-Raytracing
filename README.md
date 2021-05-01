@@ -1,8 +1,9 @@
 # Rust-Raytracing
 A Rust implementation of [_Ray Tracing in One Weekend_](https://raytracing.github.io/books/RayTracingInOneWeekend.html). 
-Currently implements all functionality of the book excluding Dielectrics which are a WIP. I have also added the code for 
-ray triangle intersection as well as procedural terrain generation with triangle meshes and perlin noise height mapping.
-Simple lighting has also been created by sending a ray back towards the light source.
+It currently implements all functionality of the book excluding Dielectrics which are a WIP. I have also added the code 
+for ray triangle intersection as well as procedural terrain generation with triangle meshes and perlin noise height 
+mapping. Simple lighting has also been created by sending a ray back towards the light source. Multi-threading has also 
+been added and can optionally be turned off with a flag within the main function.
 
 
 ![Example Render1](https://github.com/KianShepherd/Rust-Raytracing/blob/master/example1.jpg?raw=true)
@@ -15,6 +16,7 @@ Simple lighting has also been created by sending a ray back towards the light so
 * Rand  = "*"
 * Noise = "0.7"
 * Image = "*"
+* num_cpus = "1.6"
 
 ## How to use
 There are no requirements to run this program that are not included in 
@@ -44,6 +46,7 @@ demonstrate the lightings shadow effect.
     * Lambertian
     * Metal
     * Dielectric (IN PROGRESS)
+    * Mirror (TODO)
 2. Lighting
     * Multiple Point Lights
     * Shadows
@@ -53,6 +56,19 @@ demonstrate the lightings shadow effect.
 4. Shapes
     * Spheres
     * Triangles (with optional back face culling)
+    * 2D Squares
+    * 3D Cube (IN PROGRESS)
 5. Procedural Terrain
     * Height Map
     * Colour Map
+6. Multi-Threading
+   * Benchmarks
+     * Release mode on 8 Core CPU
+     * 720p procedural gen
+         * multi-threaded: 0h : 14m : 27s
+         * single thread: 1h : 7m : 35s
+         * 4.7x speedup
+     * 400p test scene
+         * multi-threaded: 0m : 19s
+         * single thread: 1m : 51s
+         * 5.8x speedup

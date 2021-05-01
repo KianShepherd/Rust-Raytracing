@@ -3,6 +3,7 @@ use crate::vec3::Vec3;
 use crate::{hittable::HitRecord, random_unit_vec3, random_f64};
 
 #[derive(Debug, Copy, Clone)]
+#[allow(dead_code)]
 pub enum Material {
     Lambertian(Vec3),
     Metal(Vec3, f64),

@@ -34,7 +34,7 @@ impl Terrain {
         }
     }
 
-    pub fn get_triangles(&mut self, noise: Option<Noise>, colour_map: Option<ColourMap>, height_scale: f64) -> Hittables<dyn Hittable> {
+    pub fn get_triangles(&mut self, noise: Option<Noise>, colour_map: Option<ColourMap>, height_scale: f64) -> Hittables {
         match noise {
             Some(noise_) => {
                 for i in 0..self.ground_points.len() {
@@ -44,9 +44,9 @@ impl Terrain {
             None => {},
         }
 
-        let hittables_: Vec<Box<dyn Hittable>> = {
+        let hittables_: Vec<Box<dyn Hittable + Send + Sync + 'static>> = {
             let r1 = &self.vertex_resolution + 1;
-            let mut hittables: Vec<Box<dyn Hittable>> = vec![];
+            let mut hittables: Vec<Box<dyn Hittable + Send + Sync + 'static>> = vec![];
             for i in 0..self.vertex_resolution {
                 for j in 0..self.vertex_resolution {
                     let i0j0 = self.ground_points[(((i + 0) * r1) + (j + 0)) as usize];
