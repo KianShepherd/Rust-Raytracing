@@ -147,7 +147,7 @@ fn create_world(aspect_ratio: f64) ->  (Hittables, Camera) {
     world_objects.push(Box::new(Sphere::new(
         Vec3::new(0.6, 0.0, -1.5),
         0.5,
-        material::Material::Metal(Vec3::new(0.7, 0.6, 0.2), 1.0))));
+        material::Material::Metal(Vec3::new(0.7, 0.6, 0.2), 0.3))));
     world_objects.push(Box::new(Sphere::new(
         Vec3::new(-0.9, 1.0, -1.2),
         0.5,
