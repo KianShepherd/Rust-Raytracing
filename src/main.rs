@@ -9,6 +9,7 @@ use std::time::Instant;
 use crate::camera::Camera;
 use crate::rectangle::Rectangle;
 use crate::vec3::Vec3;
+use crate::axis_aligned_cube::Cube;
 
 mod material;
 mod ray;
@@ -19,6 +20,7 @@ mod terrain;
 mod noise;
 mod colour_map;
 mod rectangle;
+mod axis_aligned_cube;
 
 // run with
 // cargo make run
@@ -70,13 +72,15 @@ fn random_in_hemisphere(normal: vec3::Vec3) -> vec3::Vec3 {
 
 fn create_world(aspect_ratio: f64) ->  (Hittables<dyn Hittable>, Camera) {
     let v_fov = 90.0;
-    let look_from = vec3::Vec3::new(0.0, 0.0, -2.5);
+    let look_from = vec3::Vec3::new(0.0, 0.0, -3.5);
     let look_at = vec3::Vec3::new(0.0, 0.0, 0.0);
     let v_up = vec3::Vec3::new(0.0, 1.0, 0.0);
     let focal_distance = (look_from - look_at).length();
     let aperture = 0.01;
 
     let camera = camera::Camera::new(look_from, look_at, v_up, v_fov, aspect_ratio, aperture, focal_distance);
+    let mut light_objects = vec![];
+    light_objects.push(Vec3::new(0.0, -1.0, -1.8));
 
     let mut world_objects: Vec<Box<dyn Hittable>> = vec![];
     world_objects.push(Box::new(
@@ -125,8 +129,19 @@ fn create_world(aspect_ratio: f64) ->  (Hittables<dyn Hittable>, Camera) {
             false
         )));
 
+    world_objects.push(Box::new(Cube::new(Vec3::new(-1.5,-2.0, -1.0),
+                                          Vec3::new(-0.5, 1.0, -0.5),
+                                          material::Material::Lambertian(Vec3::new(0.6, 0.6, 0.6))
+        )));
+    world_objects.push(Box::new(Cube::new(Vec3::new(1.8,-2.0, -1.5),
+                                          Vec3::new(0.2, 0.0, -1.0),
+                                          material::Material::Lambertian(Vec3::new(0.6, 0.6, 0.6))
+    )));
+
+
+
     let world = Hittables {
-        lights: vec![],
+        lights: light_objects,
         hittables: world_objects,
     };
 
@@ -181,8 +196,8 @@ fn ray_color(
                 for i in 0..world.lights.len() {
                     let light_direction = (world.lights[i] - hit_rec.p.unwrap()).unit_vector();
                     let point_of_intersection = hit_rec.p.unwrap() + (light_direction * bias);
-
-                    if world.hit(ray::Ray::new(point_of_intersection, light_direction), 0.001, f64::INFINITY, &mut hittable::HitRecord::new()) {
+                    let max_dist = (point_of_intersection - world.lights[i]).length();
+                    if world.hit(ray::Ray::new(point_of_intersection, light_direction), 0.01, max_dist / 2.0, &mut hittable::HitRecord::new()) {
                         in_shadow = in_shadow * vec3::Vec3::new(0.3, 0.3, 0.3);
                     }
                 }
@@ -204,10 +219,10 @@ fn ray_color(
 fn main() {
     let testing_scene = true;
     let aspect_ratio = 16.0 / 9.0;
-    let image_width = 300;
+    let image_width = 400;
     let image_height = (image_width as f64 / aspect_ratio) as i32;
     let mut image = RgbImage::new(image_width as u32, image_height as u32);
-    let samples_per_pixel = 40;
+    let samples_per_pixel = 30;
     let max_depth = 50;
 
     let (world, camera) =  if testing_scene { create_world(aspect_ratio) } else { create_procedural_world(aspect_ratio) };
