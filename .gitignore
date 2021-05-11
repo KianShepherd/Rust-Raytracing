@@ -2,5 +2,3 @@
 /.idea
 Cargo.lock
 **/*.rs.bk
-image.ppm
-image.jpg

@@ -19,23 +19,11 @@ been added and can optionally be turned off with a flag within the main function
 * num_cpus = "1.6"
 
 ## How to use
-There are no requirements to run this program that are not included in 
-the Cargo.toml, however it is highly recommended to compile in release 
-mode to speed up the program if using it for larger renders. Program
-will output to a file called image.jpg in the current working directory. 
+It is highly recommended compiling in release mode to speed up the program if using it for larger renders. Once compiled
+simply supply the path to the .ron file within the /configs/ folder, and an image will be output in the main directory with
+the same name.
 
-A few scripts have been included to compile in Debug/Release mode as well 
-as clean up the /target directory and generated image. These are made to
-compile and run the program then they will attempt to display it using 
-feh. If feh is not present on your system you can either edit the script
-to open the image in the image viewer of your choice or simply run the 
-program and open the generated image afterwords.
-
-```
-./release.sh    or    cargo run --release
-```
-
-## Working Features
+## Features
 1. Materials 
     * Lambertian
     * Metal
@@ -66,3 +54,7 @@ program and open the generated image afterwords.
          * multi-threaded: 0m : 19s
          * single thread: 1m : 51s
          * 5.8x speedup
+7. Config Files
+   * Raytracer settings loaded from a file to make creating multiple images with similar settings easy.
+   * allow specifying of settings file from command line (optionally multiple).
+8. Octree / K-tree Optimization (TODO)

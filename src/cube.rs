@@ -3,6 +3,8 @@ use crate::material::Material;
 use crate::vec3::Vec3;
 use crate::hittable;
 use crate::ray::Ray;
+use crate::triangle::Triangle;
+use crate::hittable::Hittable;
 
 #[allow(dead_code)]
 pub struct Cube {
@@ -22,19 +24,21 @@ impl Cube {
         let bottom_back_right = Vec3::new(top_back_right.x(), bottom_front_left.y(), top_back_right.z());
         let top_back_left = Vec3::new(bottom_front_left.x(), top_back_right.y(), top_back_right.z());
 
-        let mut squares_ = vec![];
+        let mut squares_: Vec<Rectangle> = vec![];
         //Front
-        squares_.push(Rectangle::new( bottom_front_left, bottom_front_right, top_front_left,top_front_right, mat, true));
+        squares_.push(Rectangle::new( bottom_front_left, bottom_front_right, top_front_left,top_front_right, mat, false));
         //Back
-        squares_.push(Rectangle::new( bottom_back_left, bottom_back_right, top_back_left,top_back_right, mat, true));
+        squares_.push(Rectangle::new( bottom_back_left, bottom_back_right, top_back_left,top_back_right, mat, false));
         //Top
-        squares_.push(Rectangle::new(top_front_left, top_front_right, top_back_right , top_back_left, mat, false));
+        //squares_.push(Rectangle::new(top_front_left,top_back_left,top_back_right, top_front_right,   mat, false));
+        //squares_.push(Box::new(Triangle::new(top_front_left, top_front_right, top_back_left, mat, false)));
+        //squares_.push(Box::new(Triangle::new(top_front_right, top_back_left, top_back_right, mat, false)));
         //Bottom
-        squares_.push(Rectangle::new(bottom_front_left, bottom_front_right, bottom_back_left, bottom_back_right, mat, true));
+        squares_.push(Rectangle::new(bottom_front_left, bottom_front_right, bottom_back_left, bottom_back_right, mat, false));
         //Left
-        squares_.push(Rectangle::new(bottom_back_left, bottom_front_left, top_back_left, top_front_left, mat, true));
+        squares_.push(Rectangle::new(bottom_back_left, bottom_front_left, top_back_left, top_front_left, mat, false));
         //Right
-        squares_.push(Rectangle::new(bottom_front_right, top_front_right, top_back_right, bottom_back_right  , mat, true));
+        squares_.push(Rectangle::new(bottom_front_right, top_front_right, top_back_right, bottom_back_right  , mat, false));
 
         Cube {
             top_right: top_back_right,

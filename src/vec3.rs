@@ -1,6 +1,7 @@
 use image::Rgb;
+use serde::{Serialize, Deserialize};
 
-#[derive(Debug, Copy, Clone, PartialEq)]
+#[derive(Debug, Copy, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Vec3 {
     pub x: f64,
     pub y: f64,
