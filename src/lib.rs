@@ -257,11 +257,7 @@ fn sample_pixel(
 
 pub fn create_image(ron_string: String) -> Vec<Vec<u8>> {
     let settings = configuration::RaytracerSettings::from_ron(ron_string);
-    let (world, camera) = if settings.test_scene {
-        create_world(&settings)
-    } else {
-        create_procedural_world(&settings)
-    };
+    let (world, camera) = create_world(&settings);
 
     let now = Instant::now();
     let image = if settings.multithreading {
