@@ -374,5 +374,8 @@ pub fn create_image(ron_string: String) -> Vec<Vec<u8>> {
         hours, minutes, seconds
     );
 
-    image.into_vec().map(|x| vec![x.to_rgb().channels()])
+    image
+        .into_vec()
+        .into_iter()
+        .map(|x| vec![x.to_rgb().channels()])
 }
