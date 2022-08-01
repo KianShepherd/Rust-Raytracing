@@ -7,8 +7,6 @@ use crate::vec3::Vec3;
 use image::{ImageBuffer, Rgb, RgbImage};
 use num_cpus;
 use rand::Rng;
-use std::fs::File;
-use std::io::Read;
 use std::sync::{Arc, Mutex};
 use std::time::Instant;
 use std::{env, thread};
@@ -164,39 +162,6 @@ fn create_world(settings: &RaytracerSettings) -> (Hittables, Camera) {
     (world, camera)
 }
 
-fn create_procedural_world(settings: &RaytracerSettings) -> (Hittables, Camera) {
-    let camera = camera::Camera::new(
-        settings.look_from,
-        settings.look_at,
-        settings.v_up,
-        settings.v_fov,
-        settings.aspect_ratio,
-        settings.aperture,
-        settings.focal_distance,
-    );
-    let noise = noise::Noise::new(
-        settings.terrain_resolution + 1,
-        settings.octaves,
-        settings.frequency,
-        settings.lacunarity,
-        settings.seed,
-    );
-    let colour_map = colour_map::ColourMap::new_default();
-
-    let mut terrain = terrain::Terrain::new(
-        settings.terrain_size,
-        settings.terrain_size,
-        settings.terrain_resolution,
-    );
-    let mut world: Hittables =
-        terrain.get_triangles(Some(noise), Some(colour_map), settings.height_scale);
-    let light = vec3::Vec3::new(-1500.0, 900.0, 1200.0);
-
-    world.push_light(light);
-
-    (world, camera)
-}
-
 fn ray_color(ray: ray::Ray, world: &hittables::Hittables, depth: i32) -> vec3::Vec3 {
     let mut hit_rec = hittable::HitRecord::new();
     let bias = 0.01;
@@ -290,7 +255,7 @@ fn sample_pixel(
     pixel_color
 }
 
-pub fn create_image(ron_string: String, filename: &String) {
+pub fn create_image(ron_string: String) -> Vec<Vec<u8>> {
     let settings = configuration::RaytracerSettings::from_ron(ron_string);
     let (world, camera) = if settings.test_scene {
         create_world(&settings)
@@ -412,6 +377,6 @@ pub fn create_image(ron_string: String, filename: &String) {
         "100.00% Done\n\nTime taken: {}h : {}m : {}s\n\n",
         hours, minutes, seconds
     );
-    let image_name = filename[8..filename.len() - 3].to_string() + "jpg";
-    image.save(image_name).unwrap();
+
+    image.into_vec().map(|x| vec![x.to_rgb().channels()])
 }
