@@ -59,8 +59,16 @@ pub struct RaytracerScene {
     pub camera_pos: Vec<f64>,
     pub camera_dir: Vec<f64>,
     pub camera_up: Vec<f64>,
-    pub objects: Vec<Vec<String>>,
+    pub objects: Vec<RonObject>,
     pub lights: Vec<Vec<f64>>,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct RonObject {
+    objtype: String,
+    vectors: Vec<Vec<f64>>,
+    scalars: Vec<f64>,
+    material: Vec<String>,
 }
 
 #[allow(dead_code)]
