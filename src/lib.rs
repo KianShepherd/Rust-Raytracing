@@ -15,17 +15,12 @@ use std::time::Instant;
 use std::{env, thread};
 
 mod camera;
-mod colour_map;
 mod configuration;
-mod cube;
 mod hittable;
 mod hittables;
 mod material;
-mod noise;
 mod ray;
-mod rectangle;
 mod sphere;
-mod terrain;
 mod triangle;
 mod vec3;
 
@@ -74,7 +69,7 @@ fn random_in_hemisphere(normal: vec3::Vec3) -> vec3::Vec3 {
         -in_unit_sphere
     }
 }
-
+/*
 fn create_world(settings: &RaytracerSettings) -> (Hittables, Camera) {
     let camera = camera::Camera::new(
         settings.look_from,
@@ -164,7 +159,7 @@ fn create_world(settings: &RaytracerSettings) -> (Hittables, Camera) {
 
     (world, camera)
 }
-
+*/
 fn ray_color(ray: ray::Ray, world: &hittables::Hittables, depth: i32) -> vec3::Vec3 {
     let mut hit_rec = hittable::HitRecord::new();
     let bias = 0.01;

@@ -12,7 +12,6 @@ edition = "2018"
 
 [dependencies]
 rand = "*"
-noise = "0.7"
 image = "*"
 num_cpus = "1.6"
 serde = "*"
