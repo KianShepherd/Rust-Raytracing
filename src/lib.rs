@@ -5,6 +5,7 @@ use crate::configuration::RonObject;
 use crate::hittable::Hittable;
 use crate::hittables::Hittables;
 use crate::sphere::Sphere;
+use crate::triangle::Triangle;
 use crate::vec3::Vec3;
 use image::{ImageBuffer, Rgb, RgbImage};
 use material::Material;
@@ -287,6 +288,15 @@ fn parse_ron_object(obj: RonObject) -> Box<dyn Hittable + Send + Sync + 'static>
             conv_py_vec(obj.vectors[0].clone()),
             obj.scalars[0],
             parse_ron_material(obj.material),
+        ));
+    } else if obj.objtype == "Triangle" {
+        let cull_back = if obj.scalars[0] == 0.0 { false } else { true };
+        return Box::new(Triangle::new(
+            conv_py_vec(obj.vectors[0].clone()),
+            conv_py_vec(obj.vectors[0].clone()),
+            conv_py_vec(obj.vectors[0].clone()),
+            parse_ron_material(obj.material),
+            cull_back,
         ));
     }
     panic!("unknown ron object type.");
