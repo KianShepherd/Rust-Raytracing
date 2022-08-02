@@ -254,10 +254,39 @@ fn sample_pixel(
 
     pixel_color
 }
+fn conv_py_vec(vector: Vec<f64>) -> Vec3 {
+    vec3::Vec3::new(vector[0], vector[1], vector[2])
+}
 
 pub fn create_image(ron_string: String) -> Vec<u8> {
-    let settings = configuration::RaytracerSettings::from_ron(ron_string);
-    let (world, camera) = create_world(&settings);
+    let settings = configuration::RaytracerScene::from_ron(ron_string);
+
+    let camera = camera::Camera::new(
+        conv_py_vec(settings.camera_pos.clone()),
+        conv_py_vec(settings.camera_dir.clone()),
+        conv_py_vec(settings.camera_up.clone()),
+        settings.v_fov,
+        settings.aspect_ratio,
+        settings.aperture,
+        settings.focal_distance,
+    );
+
+    // TODO: PARSE LIGHTS
+    let mut light_objects = vec![];
+    light_objects.push(Box::new(Vec3::new(-1.0, 1.5, -3.5)));
+
+    // TODO: PARSE OBJECTS
+    let mut world_objects: Vec<Box<dyn Hittable + Send + Sync + 'static>> = vec![];
+    world_objects.push(Box::new(Sphere::new(
+        Vec3::new(0.6, 0.0, -1.5),
+        0.5,
+        material::Material::Metal(Vec3::new(0.7, 0.6, 0.2), 0.3),
+    )));
+
+    let world = Hittables {
+        lights: light_objects,
+        hittables: world_objects,
+    };
 
     let now = Instant::now();
     let image = if settings.multithreading {
