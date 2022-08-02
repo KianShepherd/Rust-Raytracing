@@ -293,8 +293,8 @@ fn parse_ron_object(obj: RonObject) -> Box<dyn Hittable + Send + Sync + 'static>
         let cull_back = if obj.scalars[0] == 0.0 { false } else { true };
         return Box::new(Triangle::new(
             conv_py_vec(obj.vectors[0].clone()),
-            conv_py_vec(obj.vectors[0].clone()),
-            conv_py_vec(obj.vectors[0].clone()),
+            conv_py_vec(obj.vectors[1].clone()),
+            conv_py_vec(obj.vectors[2].clone()),
             parse_ron_material(obj.material),
             cull_back,
         ));
