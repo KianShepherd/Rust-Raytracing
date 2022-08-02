@@ -63,12 +63,12 @@ pub struct RaytracerScene {
     pub lights: Vec<Vec<f64>>,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Clone, Serialize, Deserialize, Debug)]
 pub struct RonObject {
-    objtype: String,
-    vectors: Vec<Vec<f64>>,
-    scalars: Vec<f64>,
-    material: Vec<String>,
+    pub objtype: String,
+    pub vectors: Vec<Vec<f64>>,
+    pub scalars: Vec<f64>,
+    pub material: Vec<String>,
 }
 
 #[allow(dead_code)]

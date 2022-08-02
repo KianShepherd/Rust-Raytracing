@@ -1,10 +1,13 @@
 use crate::camera::Camera;
+use crate::configuration::RaytracerScene;
 use crate::configuration::RaytracerSettings;
+use crate::configuration::RonObject;
 use crate::hittable::Hittable;
 use crate::hittables::Hittables;
 use crate::sphere::Sphere;
 use crate::vec3::Vec3;
 use image::{ImageBuffer, Rgb, RgbImage};
+use material::Material;
 use num_cpus;
 use rand::Rng;
 use std::sync::{Arc, Mutex};
@@ -254,8 +257,44 @@ fn sample_pixel(
 
     pixel_color
 }
+
 fn conv_py_vec(vector: Vec<f64>) -> Vec3 {
     vec3::Vec3::new(vector[0], vector[1], vector[2])
+}
+
+fn parse_ron_material(mat: Vec<String>) -> Material {
+    let material_type = &mat[0];
+    match &material_type[..] {
+        "Lambertian" => material::Material::Lambertian(vec3::Vec3::new(
+            mat[1].parse::<f64>().unwrap(),
+            mat[2].parse::<f64>().unwrap(),
+            mat[3].parse::<f64>().unwrap(),
+        )),
+        "Metal" => material::Material::Metal(
+            vec3::Vec3::new(
+                mat[1].parse::<f64>().unwrap(),
+                mat[2].parse::<f64>().unwrap(),
+                mat[3].parse::<f64>().unwrap(),
+            ),
+            mat[4].parse::<f64>().unwrap(),
+        ),
+        "Mirror" => material::Material::Mirror,
+        "Dielectric" => material::Material::Dielectric(mat[4].parse::<f64>().unwrap()),
+        &_ => {
+            panic!("Unknown material found")
+        }
+    }
+}
+
+fn parse_ron_object(obj: RonObject) -> Box<dyn Hittable + Send + Sync + 'static> {
+    if obj.objtype == "Sphere" {
+        return Box::new(Sphere::new(
+            conv_py_vec(obj.vectors[0].clone()),
+            obj.scalars[0],
+            parse_ron_material(obj.material),
+        ));
+    }
+    panic!("unknown ron object type.");
 }
 
 pub fn create_image(ron_string: String) -> Vec<u8> {
@@ -271,19 +310,15 @@ pub fn create_image(ron_string: String) -> Vec<u8> {
         settings.focal_distance,
     );
 
-    // TODO: PARSE LIGHTS
     let mut light_objects = vec![];
     for light in settings.lights.clone() {
-        light_objects.push(Box::new(conv_py_vec(light)));
+        light_objects.push(Box::new(conv_py_vec(light.clone())));
     }
 
-    // TODO: PARSE OBJECTS
     let mut world_objects: Vec<Box<dyn Hittable + Send + Sync + 'static>> = vec![];
-    world_objects.push(Box::new(Sphere::new(
-        Vec3::new(0.6, 0.0, -1.5),
-        0.5,
-        material::Material::Metal(Vec3::new(0.7, 0.6, 0.2), 0.3),
-    )));
+    for obj in settings.objects.clone() {
+        world_objects.push(parse_ron_object(obj.clone()));
+    }
 
     let world = Hittables {
         lights: light_objects,
