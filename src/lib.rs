@@ -273,7 +273,9 @@ pub fn create_image(ron_string: String) -> Vec<u8> {
 
     // TODO: PARSE LIGHTS
     let mut light_objects = vec![];
-    light_objects.push(Box::new(Vec3::new(-1.0, 1.5, -3.5)));
+    for light in settings.lights.clone() {
+        light_objects.push(Box::new(conv_py_vec(light)));
+    }
 
     // TODO: PARSE OBJECTS
     let mut world_objects: Vec<Box<dyn Hittable + Send + Sync + 'static>> = vec![];
