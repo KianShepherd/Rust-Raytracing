@@ -384,11 +384,7 @@ pub fn create_image(ron_string: String) -> Vec<u8> {
 
                 let mut image_data = scoped_image.lock().unwrap();
                 for final_work in inner_work_vec {
-                    println!("x: {}", final_work.x);
-                    println!("y: {}", final_work.y);
                     let colour = final_work.colour.unwrap().clone();
-                    println!("colour: {:?}", colour);
-                    println!("image:data{:?}", image_data);
                     image_data[(final_work.x as u32
                         + (final_work.y as u32 * scoped_settings.image_width as u32))
                         as usize] = colour;
