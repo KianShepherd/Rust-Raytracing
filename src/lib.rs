@@ -331,9 +331,15 @@ pub fn create_image(ron_string: String) -> Vec<u8> {
 
     let now = Instant::now();
     let image = if settings.multithreading {
-        let image_ = Arc::new(Mutex::new(Vec::with_capacity(
-            settings.image_width as usize * settings.image_height as usize,
-        )));
+        let image_ = Arc::new(Mutex::new({
+            let mut x =
+                Vec::with_capacity(settings.image_width as usize * settings.image_height as usize);
+            x.resize(
+                settings.image_width as usize * settings.image_height as usize,
+                vec![0 as u8, 0 as u8, 0 as u8],
+            );
+            x
+        }));
         let world_ = Arc::new(world);
         let camera_ = Arc::new(camera);
         let settings_ = Arc::new(settings);
