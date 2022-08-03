@@ -301,7 +301,7 @@ fn parse_ron_object(obj: RonObject) -> Box<dyn Hittable + Send + Sync + 'static>
     panic!("unknown ron object type.");
 }
 
-pub fn create_image(ron_string: String) -> Vec<u8> {
+pub fn create_image(ron_string: String) -> Vec<Vec<u8>> {
     let settings = configuration::RaytracerScene::from_ron(ron_string);
 
     let camera = camera::Camera::new(
@@ -448,5 +448,5 @@ pub fn create_image(ron_string: String) -> Vec<u8> {
         hours, minutes, seconds
     );
 
-    image.into_iter().flatten().collect()
+    image
 }
