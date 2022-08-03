@@ -1,5 +1,4 @@
-use image::Rgb;
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Copy, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Vec3 {
@@ -68,13 +67,13 @@ impl Vec3 {
         format!("{} {} {}", r, g, b)
     }
 
-    pub fn to_rgb(&self, samples_per_pixel: usize) -> image::Rgb<u8> {
+    pub fn to_rgb(&self, samples_per_pixel: usize) -> Vec<u8> {
         let scale = 1.0 / samples_per_pixel as f64;
         let r = (256.0 * clamp((self.x * scale).sqrt(), 0.0, 0.999)) as u8;
         let g = (256.0 * clamp((self.y * scale).sqrt(), 0.0, 0.999)) as u8;
         let b = (256.0 * clamp((self.z * scale).sqrt(), 0.0, 0.999)) as u8;
 
-        Rgb([r, g ,b])
+        vec![r, g, b]
     }
 }
 

@@ -7,7 +7,6 @@ use crate::hittables::Hittables;
 use crate::sphere::Sphere;
 use crate::triangle::Triangle;
 use crate::vec3::Vec3;
-use image::{ImageBuffer, Rgb, RgbImage};
 use material::Material;
 use num_cpus;
 use rand::Rng;
@@ -202,11 +201,11 @@ fn ray_color(ray: ray::Ray, world: &hittables::Hittables, depth: i32) -> vec3::V
     }
 }
 
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Clone)]
 struct Work {
     x: usize,
     y: usize,
-    colour: Option<Rgb<u8>>,
+    colour: Option<Vec<u8>>,
 }
 
 fn create_work_list(image_width: i32, image_height: i32, num_cpu: usize) -> Vec<Vec<Work>> {
@@ -332,9 +331,8 @@ pub fn create_image(ron_string: String) -> Vec<u8> {
 
     let now = Instant::now();
     let image = if settings.multithreading {
-        let image_ = Arc::new(Mutex::new(ImageBuffer::new(
-            settings.image_width as u32,
-            settings.image_height as u32,
+        let image_ = Arc::new(Mutex::new(Vec::with_capacity(
+            settings.image_width as usize * settings.image_height as usize,
         )));
         let world_ = Arc::new(world);
         let camera_ = Arc::new(camera);
@@ -380,11 +378,9 @@ pub fn create_image(ron_string: String) -> Vec<u8> {
 
                 let mut image_data = scoped_image.lock().unwrap();
                 for final_work in inner_work_vec {
-                    image_data.put_pixel(
-                        final_work.x as u32,
-                        final_work.y as u32,
-                        final_work.colour.unwrap(),
-                    );
+                    image_data[(final_work.x as u32
+                        + (final_work.y as u32 * scoped_settings.image_width as u32))
+                        as usize] = final_work.colour.unwrap();
                     //println!("{}:{}:{:#?}\n", final_work.x, final_work.y, final_work.colour.unwrap())
                 }
 
@@ -398,12 +394,15 @@ pub fn create_image(ron_string: String) -> Vec<u8> {
 
         let final_val = match image_.lock() {
             Ok(x) => x.clone(),
-            Err(_) => ImageBuffer::new(settings_.image_width as u32, settings_.image_height as u32),
+            Err(_) => {
+                Vec::with_capacity(settings_.image_width as usize * settings_.image_height as usize)
+            }
         };
         final_val
     } else {
         // Single Thread
-        let mut image_ = RgbImage::new(settings.image_width as u32, settings.image_height as u32);
+        let mut image_ =
+            Vec::with_capacity(settings.image_width as usize * settings.image_height as usize);
         let progress_prints = settings.image_width as f64 / 16.0;
         for j in 0..settings.image_height {
             // progress check
@@ -425,11 +424,8 @@ pub fn create_image(ron_string: String) -> Vec<u8> {
                     &camera,
                     &world,
                 );
-                image_.put_pixel(
-                    i as u32,
-                    j as u32,
-                    pixel_color.to_rgb(settings.samples_per_pixel),
-                );
+                image_[i as usize * (j as usize * settings.image_width as usize)] =
+                    pixel_color.to_rgb(settings.samples_per_pixel);
             }
         }
         image_
@@ -445,5 +441,5 @@ pub fn create_image(ron_string: String) -> Vec<u8> {
         hours, minutes, seconds
     );
 
-    image.into_vec()
+    image.into_iter().flatten().collect()
 }
