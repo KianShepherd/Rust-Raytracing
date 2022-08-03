@@ -380,7 +380,7 @@ pub fn create_image(ron_string: String) -> Vec<u8> {
                 for final_work in inner_work_vec {
                     image_data[(final_work.x as u32
                         + (final_work.y as u32 * scoped_settings.image_width as u32))
-                        as usize] = final_work.colour.unwrap();
+                        as usize] = final_work.colour.unwrap().clone();
                     //println!("{}:{}:{:#?}\n", final_work.x, final_work.y, final_work.colour.unwrap())
                 }
 
